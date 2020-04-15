@@ -1,5 +1,12 @@
-const DAYS_COUNT = 15;
-const TASK_COUNT = 10;
+const DAYS_COUNT = 10;
+
+import {
+  getRandomElement,
+  getRandomArray,
+  getArray,
+  getRandomInteger,
+  getRandomDate,
+} from "./util.js";
 
 export const CITIES = [`St.Petersburg`, `Moscow`, `Krasnoyarsk`, `Abakan`, `Sayanogorsk`, `Minsk`, `Novosibirsk`];
 
@@ -59,42 +66,28 @@ export const menuValues = [
   },
 ];
 
-import {
-  getRandomElement,
-  getRandomArray,
-  getArray,
-  getRandomInteger,
-  getRandomDate,
-} from "./util.js";
-
 const getEvent = () => {
   const type = getRandomElement(TYPES_OF_EVENT);
   const start = getRandomDate(DAYS_COUNT);
   const residual = getRandomInteger(20, 180) * 60 * 1000;
+  const end = start + residual;
   const residualInHours = residual / 1000 / 60 / 60;
   const hours = Math.trunc(residualInHours);
   const minutes = Math.trunc((residualInHours - hours) * 60);
   return {
+    date: `${new Date(start)}`.slice(4, 10),
     type,
     city: getRandomElement(CITIES),
     price: getRandomInteger(0, 1000),
-    description: new Set(getRandomArray(1, 3, DESCRIPTIONS)),
+    description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
     start,
-    end: start + residual,
+    end,
     hours,
     minutes,
-    offers: new Set(getRandomArray(1, 2, OPTIONS)),
-    urls: new Set(getArray(0, 5)),
+    offers: new Set(getRandomArray(1, 4, OPTIONS)),
+    urls: Array.from(new Set(getArray(0, 5))),
   };
 
-};
-
-export const getCities = () => {
-  return eventsData.map((event) => event.city);
-};
-
-export const getDatesEnd = () => {
-  return eventsData.map((event) => new Date(event.end));
 };
 
 export const getEventsData = (count) => {
@@ -102,11 +95,11 @@ export const getEventsData = (count) => {
   return events.fill(``).map(getEvent).sort((a, b) => a.start - b.start);
 };
 
-export const eventsData = getEventsData(TASK_COUNT);
-
-export const getDatesStart = () => {
-  return eventsData.map((event) => new Date(event.start));
+export const getUniqDates = (eventsData) => {
+  return Array.from(new Set(eventsData.map((eventData) => eventData.date)));
+};
+export const getCities = (eventsData) => {
+  return eventsData.map((event) => event.city);
 };
 
-export const tripDaysDates = new Set(getDatesStart().map((date) => `${date}`.slice(4, 10)));
-
+export const filtersNames = [`Everything`, `Future`, `Past`];
