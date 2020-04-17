@@ -1,9 +1,46 @@
-import {TYPES_OF_TRANSFER} from "../const.js";
-import {TYPES_OF_ACTIVITY} from "../const.js";
-import {CITIES} from "../const.js";
+import {createElement, formatDate} from "./../util.js";
 
-export const createFormTemplate = (events, options) =>
-  `<form class="trip-events__item  event  event--edit" action="#" method="post">
+export default class Create {
+  constructor({
+    type,
+    city,
+    price,
+    description,
+    start,
+    end,
+    offers,
+    urls
+  }, typesOfTransfer, typesOfActivity, cities, options) {
+    this._type = type;
+    this._city = city;
+    this._price = price;
+    this._description = description;
+    this._start = formatDate(new Date(start));
+    this._end = formatDate(new Date(end));
+    this._startTime = new Date(start).toTimeString().slice(0, 5);
+    this._endTime = new Date(end).toTimeString().slice(0, 5);
+    this._offers = offers;
+    this._urls = urls;
+    this._typesOfTransfer = typesOfTransfer;
+    this._typesOfActivity = typesOfActivity;
+    this._cities = cities;
+    this._options = options;
+    this._element = null;
+  }
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+  removeElement() {
+    if (this._element) {
+      this._element = null;
+    }
+  }
+
+  getTemplate() {
+    return `<form class="trip-events__item  event  event--edit" action="#" method="post">
   <header class="event__header">
     <div class="event__type-wrapper">
       <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -16,19 +53,19 @@ export const createFormTemplate = (events, options) =>
         <fieldset class="event__type-group">
         <fieldset class="event__type-group">
         <legend class="visually-hidden">Transfer</legend>
-        ${TYPES_OF_TRANSFER.map((eventType) =>
+        ${this._typesOfTransfer.map((transferType) =>
     `<div class="event__type-item">
-        <input id="event-type-${eventType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType.split(` `)[0].toLowerCase()}">
-        <label class="event__type-label  event__type-label--${eventType.split(` `)[0].toLowerCase()}" for="event-type-${eventType.split(` `)[0].toLowerCase()}-1">${eventType.split(` `)[0]}</label>
+        <input id="event-type-${transferType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${transferType.split(` `)[0].toLowerCase()}">
+        <label class="event__type-label  event__type-label--${transferType.split(` `)[0].toLowerCase()}" for="event-type-${transferType.split(` `)[0].toLowerCase()}-1">${transferType.split(` `)[0]}</label>
       </div>`).join(``)}
       </fieldset>
 
       <fieldset class="event__type-group">
         <legend class="visually-hidden">Activity</legend>
-        ${TYPES_OF_ACTIVITY.map((eventType) =>
+        ${this._typesOfActivity.map((activityType) =>
     `<div class="event__type-item">
-        <input id="event-type-${eventType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType.split(` `)[0].toLowerCase()}">
-        <label class="event__type-label  event__type-label--${eventType.split(` `)[0].toLowerCase()}" for="event-type-${eventType.split(` `)[0].toLowerCase()}-1">${eventType.split(` `)[0]}</label>
+          <input id="event-type-${activityType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${activityType.split(` `)[0].toLowerCase()}">
+          <label class="event__type-label  event__type-label--${activityType.split(` `)[0].toLowerCase()}" for="event-type-${activityType.split(` `)[0].toLowerCase()}-1">${activityType.split(` `)[0]}</label>
       </div>`).join(``)}
       </fieldset>
       </div>
@@ -36,11 +73,11 @@ export const createFormTemplate = (events, options) =>
 
     <div class="event__field-group  event__field-group--destination">
       <label class="event__label  event__type-output" for="event-destination-1">
-
+        ${this._type}
       </label>
-      <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
+      <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._city}" list="destination-list-1">
       <datalist id="destination-list-1">
-      ${CITIES.map((CITY) => `<option value="${CITY}"></option>`)}
+      ${this._cities.map((CITY) => `<option value="${CITY}"></option>`)}
       </datalist>
     </div>
 
@@ -48,41 +85,33 @@ export const createFormTemplate = (events, options) =>
       <label class="visually-hidden" for="event-start-time-1">
         From
       </label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${this._start} ${this._startTime}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">
         To
       </label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="">
+      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${this._end} ${this._endTime}">
     </div>
 
     <div class="event__field-group  event__field-group--price">
       <label class="event__label" for="event-price-1">
-        <span class="visually-hidden">Price</span>
+        <span class="visually-hidden">${this._price}</span>
         &euro;
       </label>
-      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._price}">
     </div>
 
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
     <button class="event__reset-btn" type="reset">Cancel</button>
   </header>
 
-  ${events.map((event) => {
-    return getEditEventTemplate(event, options);
-  }).join(``)}
-
-</form>`;
-
-const getEditEventTemplate = ({description, offers, urls}, options) =>
-  `<form class="trip-events__item  event  event--edit" action="#" method="post">
   <section class="event__details">
 
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-      ${options.map((option) =>`<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}" ${(Array.from(offers).filter((offer) => offer.option === option.option)).length > 0 ? `checked` : ``}>
+      ${this._options.map((option) =>`<div class="event__offer-selector">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}" ${(Array.from(this._offers).filter((offer) => offer.option === option.option)).length > 0 ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-${option.id}-1">
             <span class="event__offer-title">${option.option}</span>
             &plus;
@@ -94,13 +123,16 @@ const getEditEventTemplate = ({description, offers, urls}, options) =>
 
     <section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${Array.from(description)}</p>
+      <p class="event__destination-description">${this._description}</p>
 
       <div class="event__photos-container">
         <div class="event__photos-tape">
-        ${Array.from(urls).map((url) => `<img class="event__photo" src=${url} alt="Event photo">`).join(``)}
+        ${this._urls.map((url) =>
+    `<img class="event__photo" src=${url} alt="Event photo">`).join(``)}
         </div>
       </div>
     </section>
   </section>
-  </form>`;
+</form>`;
+  }
+}

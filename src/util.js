@@ -30,3 +30,35 @@ export const getRandomInteger = (min, max) => {
 export const getRandomDate = (days) => {
   return Date.now() + (getRandomInteger(0, (days * 24))) * TIME_IN_MS / 24;
 };
+
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+export const render = (container, element) => {
+  container.append(element);
+};
+
+export const remove = (element) => {
+  if (element) {
+    element.remove();
+  }
+};
+
+export const formatDate = (date) => {
+  let day = date.getDate();
+  if (day < 10) {
+    day = `0` + day;
+  }
+  let month = date.getMonth() + 1;
+  if (month < 10) {
+    month = `0` + month;
+  }
+  let year = date.getFullYear() % 100;
+  if (year < 10) {
+    year = `0` + year;
+  }
+  return day + `.` + month + `.` + year;
+};

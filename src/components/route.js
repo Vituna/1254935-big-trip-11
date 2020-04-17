@@ -1,11 +1,31 @@
-export const createSiteRouteInformation = (cities, datesStart, datesEnd) =>
-  `<section class="trip-main__trip-info  trip-info">
-  <div class="trip-info__main">
-${cities.length > 3 ?
-    `<h1 class="trip-info__title">${cities[0]} &mdash; ... &mdash; ${cities[cities.length - 1]}</h1>` :
-    `<h1 class="trip-info__title">${cities[0]} &mdash; ${cities[1]} &mdash; ${cities[2]}</h1>`}
+import {createElement} from "./../util.js";
 
-<p class="trip-info__dates">${new Date(datesStart[0]).toDateString().slice(4)}&nbsp;&mdash;&nbsp;${new Date(datesEnd[datesEnd.length - 1]).toDateString().slice(4)}</p>
+export default class TripInfo {
+  constructor(cities, eventsData) {
+    this._cities = cities;
+    this._startCity = cities[0];
+    this._middleCity = cities.length > 3 ? `...` : cities[1];
+    this._endCity = cities[cities.length - 1];
+    this._dateStartTrip = new Date(eventsData[0].start).toDateString().slice(4, 10);
+    this._dateEndTrip = new Date(eventsData[eventsData.length - 1].end).toDateString().slice(4, 10);
+    this._element = null;
+  }
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+  removeElement() {
+    if (this._element) {
+      this._element = null;
+    }
+  }
 
-</div>
-</section>`;
+  getTemplate() {
+    return `<div class="trip-info__main">
+    <h1 class="trip-info__title">${this._startCity} &mdash; ${this._middleCity} &mdash; ${this._endCity}</h1>
+    <p class="trip-info__dates">${this._dateStartTrip}&nbsp;&mdash;&nbsp;${this._dateEndTrip}</p>
+    </div>`;
+  }
+}

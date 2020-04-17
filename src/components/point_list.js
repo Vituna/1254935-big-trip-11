@@ -1,8 +1,7 @@
 import {createElement} from "./../util.js";
 
-export default class Cost {
-  constructor(filtersNames) {
-    this._filtersNames = filtersNames;
+export default class PointList {
+  constructor() {
     this._element = null;
   }
   getElement() {
@@ -11,10 +10,14 @@ export default class Cost {
     }
     return this._element;
   }
+  removeElement() {
+    if (this._element) {
+      this._element = null;
+    }
+  }
+
   getTemplate() {
-    return `<p class="trip-info__cost">
-    Total: &euro;&nbsp;<span class="trip-info__cost-value">30</span>
-    </p>`;
+    return `<ul class="trip-events__list">
+    </ul>`;
   }
 }
-
