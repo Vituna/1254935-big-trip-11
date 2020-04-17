@@ -1,4 +1,4 @@
-const EVENT_COUNT = 5;
+const EVENT_COUNT = 15;
 
 import Menu from './components/site-menu.js';
 import Filters from './components/filter.js';
@@ -10,6 +10,7 @@ import Day from './components/point_day.js';
 import PointList from './components/point_list.js';
 import Point from './components/point.js';
 import Create from './components/create.js';
+import NoPoints from './components/no_points.js';
 
 import {
   getEventsData,
@@ -26,6 +27,8 @@ import {
 const tripControls = document.querySelector(`.trip-controls`);
 const tripEvents = document.querySelector(`.trip-events`);
 const tripInfo = document.querySelector(`.trip-main`);
+const addButton = document.querySelector(`.trip-main__event-add-btn`);
+
 
 const eventsData = getEventsData(EVENT_COUNT);
 const uniqDates = getUniqDates(eventsData);
@@ -34,6 +37,12 @@ const tripCities = getCities(eventsData);
 const renderMenu = () => {
   const menu = new Menu(menuValues);
   tripControls.append(menu.getElement());
+};
+
+const renderNoPoints = () => {
+  const noPoints = new NoPoints();
+  tripEvents.append(noPoints.getElement());
+
 };
 
 const renderFilters = () => {
@@ -54,6 +63,12 @@ const reenderMany = () => {
 const renderSort = () => {
   const sort = new Sort();
   tripEvents.prepend(sort.getElement());
+};
+
+const renderPointAdd = () => {
+  const eventAdd = new Create(TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, CITIES);
+  tripEvents.append(eventAdd.getElement());
+  addButton.disabled = true;
 };
 
 const renderDaysList = () => {
@@ -111,8 +126,15 @@ const renderPoint = (eventData, container) => {
 };
 
 renderMenu();
-renderFilters();
 reenderMany();
+renderFilters();
 renderSort();
-renderTripInfo();
-renderDaysList();
+
+if (eventsData.length > 0) {
+  renderTripInfo();
+  renderDaysList();
+  renderPointAdd();
+} else {
+  renderNoPoints();
+}
+
