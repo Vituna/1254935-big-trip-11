@@ -95,11 +95,28 @@ export const getEventsData = (count) => {
   return events.fill(``).map(getEvent).sort((a, b) => a.start - b.start);
 };
 
-export const getUniqDates = (eventsData) => {
-  return Array.from(new Set(eventsData.map((eventData) => eventData.date)));
+export const getEventsInDays = (eventsData) => {
+  return eventsData.reduce((acc, event) => {
+    const date = new Date(event.start).toDateString();
+    if (acc[date]) {
+      acc[date].push(event);
+    } else {
+      acc[date] = [event];
+    }
+    return acc;
+  }, {});
 };
+
 export const getCities = (eventsData) => {
   return eventsData.map((event) => event.city);
+};
+
+export const getPrice = (eventsData) => {
+  const tripPrices = eventsData.map((event) => event.price).reduce((a, b) => a + b);
+  const offersPrices = eventsData.map((event) => Array.from(event.offers).reduce((a, b) => {
+    return a + b.price;
+  }, 0)).reduce((a, b) => a + b);
+  return tripPrices + offersPrices;
 };
 
 export const filtersNames = [`Everything`, `Future`, `Past`];

@@ -1,24 +1,7 @@
-import {createElement} from "./../util.js";
+import AbstractComponent from "./abstract-component.js";
+import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, CITIES} from "./../const.js";
 
-export default class EventAdd {
-  constructor(typesOfTransfer, typesOfActivity, cities) {
-    this._typesOfTransfer = typesOfTransfer;
-    this._typesOfActivity = typesOfActivity;
-    this._cities = cities;
-    this._element = null;
-  }
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-  removeElement() {
-    if (this._element) {
-      this._element = null;
-    }
-  }
-
+export default class EventAdd extends AbstractComponent {
   getTemplate() {
     return `<form class="trip-events__item  event  event--edit" action="#" method="post">
     <header class="event__header">
@@ -33,14 +16,14 @@ export default class EventAdd {
           <fieldset class="event__type-group">
           <fieldset class="event__type-group">
           <legend class="visually-hidden">Transfer</legend>
-          ${this._typesOfTransfer.map((eventType) => `<div class="event__type-item">
+          ${TYPES_OF_TRANSFER.map((eventType) => `<div class="event__type-item">
           <input id="event-type-${eventType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType.split(` `)[0].toLowerCase()}">
           <label class="event__type-label  event__type-label--${eventType.split(` `)[0].toLowerCase()}" for="event-type-${eventType.split(` `)[0].toLowerCase()}-1">${eventType.split(` `)[0]}</label>
         </div>`).join(``)}
         </fieldset>
         <fieldset class="event__type-group">
           <legend class="visually-hidden">Activity</legend>
-          ${this._typesOfActivity.map((eventType) => `<div class="event__type-item">
+          ${TYPES_OF_ACTIVITY.map((eventType) => `<div class="event__type-item">
           <input id="event-type-${eventType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType.split(` `)[0].toLowerCase()}">
           <label class="event__type-label  event__type-label--${eventType.split(` `)[0].toLowerCase()}" for="event-type-${eventType.split(` `)[0].toLowerCase()}-1">${eventType.split(` `)[0]}</label>
         </div>`).join(``)}
@@ -54,7 +37,7 @@ export default class EventAdd {
         </label>
         <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
         <datalist id="destination-list-1">
-        ${this._cities.map((city) => `<option value="${city}"></option>`)}
+        ${CITIES.map((city) => `<option value="${city}"></option>`)}
         </datalist>
       </div>
 

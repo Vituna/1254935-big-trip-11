@@ -49,16 +49,7 @@ export const remove = (element) => {
 
 export const formatDate = (date) => {
   let day = date.getDate();
-  if (day < 10) {
-    day = `0` + day;
-  }
   let month = date.getMonth() + 1;
-  if (month < 10) {
-    month = `0` + month;
-  }
   let year = date.getFullYear() % 100;
-  if (year < 10) {
-    year = `0` + year;
-  }
-  return day + `.` + month + `.` + year;
+  return `${day < 10 ? `0${day}` : day}.${month < 10 ? `0${month}` : month}.${year < 10 ? `0${year}` : year}`;
 };
