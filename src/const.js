@@ -111,12 +111,13 @@ export const getCities = (eventsData) => {
   return eventsData.map((event) => event.city);
 };
 
-export const getPrice = (eventsData) => {
-  const tripPrices = eventsData.map((event) => event.price).reduce((a, b) => a + b);
-  const offersPrices = eventsData.map((event) => Array.from(event.offers).reduce((a, b) => {
-    return a + b.price;
-  }, 0)).reduce((a, b) => a + b);
-  return tripPrices + offersPrices;
-};
+export const getPrice = ((eventsData) => {
+  return eventsData.map((event) => {
+    const offersPrice = Array.from(event.offers).reduce((a, b) => {
+      return a + b.price;
+    }, 0);
+    return event.price + offersPrice;
+  }).reduce((a, b) => a + b);
+});
 
 export const filtersNames = [`Everything`, `Future`, `Past`];
