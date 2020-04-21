@@ -3,7 +3,6 @@ const EVENT_COUNT = 15;
 import Menu from './components/site-menu.js';
 import Filters from './components/filter.js';
 import TripInfo from './components/route.js';
-import Sort from './components/sorting.js';
 import DaysList from './components/point_day_all.js';
 import PointAdd from './components/point_add.js';
 import TripController from './controllers/trip-controller.js';
@@ -48,11 +47,6 @@ const renderTripInfo = () => {
   tripInfo.prepend(info.getElement());
 };
 
-const renderSort = () => {
-  const sort = new Sort();
-  tripEvents.after(sort.getElement());
-};
-
 const renderPointAdd = () => {
   const eventAdd = new PointAdd();
   tripEvents.append(eventAdd.getElement());
@@ -61,11 +55,10 @@ const renderPointAdd = () => {
 
 renderMenu();
 renderFilters();
-renderSort();
 if (eventsData.length > 0) {
   renderTripInfo();
   const daysList = renderDaysList();
-  const tripController = new TripController(daysList, eventsInDays);
+  const tripController = new TripController(daysList, eventsInDays, eventsData);
   tripController.init();
 } else {
   renderPointAdd();
