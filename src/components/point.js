@@ -1,6 +1,6 @@
 import AbstractComponent from "./abstract-component.js";
 
-const OFFERS_COUNT = 3;
+const OFFERS_COUNT = 4;
 
 export default class Event extends AbstractComponent {
   constructor({
@@ -9,8 +9,6 @@ export default class Event extends AbstractComponent {
     price,
     start,
     end,
-    hours,
-    minutes,
     offers
   }) {
     super();
@@ -19,18 +17,18 @@ export default class Event extends AbstractComponent {
     this._price = price;
     this._start = new Date(start);
     this._end = new Date(end);
-    this._hours = hours;
-    this._minutes = minutes;
     this._offers = offers;
+    this._hours = Math.trunc((end - start) / 1000 / 60 / 60);
+    this._minutes = Math.trunc(((end - start) / 1000 / 60 / 60 - this._hours) * 60);
   }
 
   getTemplate() {
     return `<li class="trip-events__item">
     <div class="event">
       <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.split(` `)[0].toLowerCase()}.png" alt="Event type icon">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${this._type} ${this._city}</h3>
+      <h3 class="event__title">${this._type.title} ${this._city}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
@@ -59,6 +57,5 @@ export default class Event extends AbstractComponent {
       </button>
     </div>
   </li>`;
-
   }
 }

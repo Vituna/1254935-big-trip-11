@@ -1,4 +1,4 @@
-const DAYS_COUNT = 10;
+const DAYS_COUNT = 14;
 
 import {
   getRandomElement,
@@ -8,30 +8,35 @@ import {
   getRandomDate,
 } from "./util.js";
 
-export const CITIES = [`St.Petersburg`, `Moscow`, `Krasnoyarsk`, `Abakan`, `Sayanogorsk`, `Minsk`, `Novosibirsk`];
-
-export const TYPES_OF_TRANSFER = [
-  `Taxi to`,
-  `Bus to`,
-  `Train to`,
-  `Ship to`,
-  `Transport to`,
-  `Drive to`,
-  `Flight to`,
-];
-
-export const TYPES_OF_ACTIVITY = [
-  `Check-in in`,
-  `Sightseeing in`,
-  `Restaurant in`,
-];
-const TYPES_OF_EVENT = TYPES_OF_TRANSFER.concat(TYPES_OF_ACTIVITY);
-
 const DESCRIPTIONS = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
   `Cras aliquet varius magna, non porta ligula feugiat eget.`,
   `Fusce tristique felis at fermentum pharetra.`,
   `Aliquam id orci ut lectus varius viverra.`,
   `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.`];
+
+export const CITIES = [{
+  city: `St.Petersburg`,
+  description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
+  urls: Array.from(new Set(getArray(1, 5))),
+},
+{
+  city: `Moscow`,
+  description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
+  urls: Array.from(new Set(getArray(1, 5))),
+}, {
+  city: `Krasnoyarsk`,
+  description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
+  urls: Array.from(new Set(getArray(1, 5))),
+},
+{
+  city: `Abakan`,
+  description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
+  urls: Array.from(new Set(getArray(1, 5))),
+}, {
+  city: `Sayanogorsk`,
+  description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
+  urls: Array.from(new Set(getArray(1, 5))),
+}];
 
 export const OPTIONS = [{
   id: `luggage`,
@@ -55,6 +60,63 @@ export const OPTIONS = [{
 },
 ];
 
+export const TYPES_OF_TRANSFER = [
+  {
+    title: `Bus to`,
+    type: `bus`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Drive to`,
+    type: `drive`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Flight to`,
+    type: `flight`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Ship to`,
+    type: `ship`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Taxi to`,
+    type: `taxi`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Train to`,
+    type: `train`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Transport to`,
+    type: `transport`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+];
+export const TYPES_OF_ACTIVITY = [
+  {
+    title: `Check-in in`,
+    type: `check-in`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Restaurant in`,
+    type: `restaurant`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+  {
+    title: `Sightseeing in`,
+    type: `sightseeing`,
+    options: new Set(getRandomArray(1, 4, OPTIONS)),
+  },
+];
+
+export const TYPES_OF_EVENT = TYPES_OF_TRANSFER.concat(TYPES_OF_ACTIVITY);
+
 export const menuValues = [
   {
     title: `Table`,
@@ -71,40 +133,20 @@ const getEvent = () => {
   const start = getRandomDate(DAYS_COUNT);
   const residual = getRandomInteger(20, 180) * 60 * 1000;
   const end = start + residual;
-  const residualInHours = residual / 1000 / 60 / 60;
-  const hours = Math.trunc(residualInHours);
-  const minutes = Math.trunc((residualInHours - hours) * 60);
   return {
-    date: `${new Date(start)}`.slice(4, 10),
     type,
-    city: getRandomElement(CITIES),
+    city: getRandomElement(CITIES).city,
     price: getRandomInteger(0, 1000),
-    description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
     start,
     end,
-    hours,
-    minutes,
-    offers: new Set(getRandomArray(1, 4, OPTIONS)),
-    urls: Array.from(new Set(getArray(0, 5))),
+    offers: type.options,
+    isFavorite: false
   };
-
 };
 
 export const getEventsData = (count) => {
   const events = new Array(count);
-  return events.fill(``).map(getEvent).sort((a, b) => a.start - b.start);
-};
-
-export const getEventsInDays = (eventsData) => {
-  return eventsData.reduce((acc, event) => {
-    const date = new Date(event.start).toDateString();
-    if (acc[date]) {
-      acc[date].push(event);
-    } else {
-      acc[date] = [event];
-    }
-    return acc;
-  }, {});
+  return events.fill(``).map(getEvent);
 };
 
 export const getCities = (eventsData) => {
