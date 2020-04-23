@@ -1,7 +1,7 @@
 import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT, CITIES, OPTIONS} from "./../const.js";
-import AbstractComponent from "./abstract-component.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 
-export default class EventEdit extends AbstractComponent {
+export default class EventEdit extends AbstractSmartComponent {
   constructor({
     type,
     city,
@@ -29,6 +29,7 @@ export default class EventEdit extends AbstractComponent {
     const label = this.getElement().querySelector(`.event__type-output`);
     const img = this.getElement().querySelector(`.event__type-icon`);
     const offersContainer = this.getElement().querySelector(`.event__available-offers`);
+
     const onTypeChange = (evt) => {
       const newType = TYPES_OF_EVENT.find((type) => type.type === evt.target.value);
       label.textContent = newType.title;
@@ -60,12 +61,22 @@ export default class EventEdit extends AbstractComponent {
         description.textContent = newType.description;
         photosContainer.innerHTML = this._getPhotos(newType);
       }
+      this.rerender();
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
 
   _getPhotos(newType) {
     return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
+  }
+
+  recoveryListeners() {
+    this._subscribeOnTypeChange();
+    this._subscribeOnCityChange();
+  }
+
+  rerender() {
+    super.rerender();
   }
 
   getTemplate() {
