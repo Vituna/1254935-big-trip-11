@@ -15,6 +15,7 @@ export default class TripController {
     this._onDataChange = this._onDataChange.bind(this);
     this._subscriptions = [];
     this._onChangeView = this._onChangeView.bind(this);
+
   }
 
   init() {
@@ -46,6 +47,11 @@ export default class TripController {
         break;
     }
   }
+
+  rerender() {
+    super.rerender();
+  }
+
 
   _renderDaysList() {
     remove(this._daysList.getElement());
@@ -81,6 +87,7 @@ export default class TripController {
 
   _onDataChange(newData, oldData) {
     this._eventsData[this._eventsData.findIndex((it) => it === oldData)] = newData;
+    this.rerender();
   }
 
   _onChangeView() {

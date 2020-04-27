@@ -10,6 +10,7 @@ export default class PointController {
     this._eventEdit = new EventEdit(eventData);
     this._onDataChange = onDataChange;
     this._onChangeView = onChangeView;
+
     this.create();
   }
 
@@ -29,6 +30,7 @@ export default class PointController {
       this._container.replaceChild(this._eventEdit.getElement(), this._event.getElement());
       document.addEventListener(`keydown`, onEscKeydown);
     });
+
     this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
       this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
       document.removeEventListener(`keydown`, onEscKeydown);

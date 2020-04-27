@@ -9,7 +9,8 @@ export default class EventEdit extends AbstractSmartComponent {
     start,
     end,
     offers,
-    isFavorite
+    isFavorite,
+    onDataChange
   }) {
     super();
     this._type = type;
@@ -23,21 +24,26 @@ export default class EventEdit extends AbstractSmartComponent {
     this._isFavorite = isFavorite;
     this._subscribeOnTypeChange();
     this._subscribeOnCityChange();
+    this._onDataChange = onDataChange;
+
   }
 
   _subscribeOnTypeChange() {
     const label = this.getElement().querySelector(`.event__type-output`);
-    const img = this.getElement().querySelector(`.event__type-icon`);
+    // const img = this.getElement().querySelector(`.event__type-icon`);
     const offersContainer = this.getElement().querySelector(`.event__available-offers`);
-
     const onTypeChange = (evt) => {
       const newType = TYPES_OF_EVENT.find((type) => type.type === evt.target.value);
       label.textContent = newType.title;
-      img.src = `img/icons/${newType.type}.png`;
+      // img.src = `img/icons/${newType.type}.png`;
+      this._type.type = newType.type;
       offersContainer.innerHTML = this._getOffers(newType);
     };
+    this._onDataChange();
+
     this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
   }
+
 
   _getOffers(newType) {
     return Array.from(newType.options).map((option) => {
@@ -52,6 +58,7 @@ export default class EventEdit extends AbstractSmartComponent {
     }).join(``);
   }
 
+
   _subscribeOnCityChange() {
     const onCityChange = (evt) => {
       const description = this.getElement().querySelector(`.event__destination-description`);
@@ -60,8 +67,9 @@ export default class EventEdit extends AbstractSmartComponent {
         const newType = CITIES[CITIES.findIndex((it) => it.city === evt.target.value)];
         description.textContent = newType.description;
         photosContainer.innerHTML = this._getPhotos(newType);
+        this._onDataChange(newType);
+
       }
-      this.rerender();
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
@@ -110,7 +118,7 @@ export default class EventEdit extends AbstractSmartComponent {
 
         <div class="event__field-group  event__field-group--destination">
         <label class="event__label  event__type-output" for="event-destination-1">
-          ${this._type.title}
+          ${this._type.type}
         </label>
         <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._city}" list="destination-list-1">
         <datalist id="destination-list-1">
@@ -184,4 +192,5 @@ export default class EventEdit extends AbstractSmartComponent {
     </form>
     </li>`;
   }
+
 }
