@@ -1,5 +1,10 @@
-import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT, CITIES, OPTIONS} from "./../const.js";
+import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT, CITIES} from "./../const.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import flatpickr from 'flatpickr';
+import moment from 'moment';
+
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
 
 export default class EventEdit extends AbstractSmartComponent {
   constructor({
@@ -10,82 +15,22 @@ export default class EventEdit extends AbstractSmartComponent {
     end,
     offers,
     isFavorite,
-    onDataChange
+
   }) {
     super();
     this._type = type;
     this._city = city;
     this._price = price;
-    this._start = new Date(start).toDateString();
-    this._end = new Date(end).toDateString();
-    this._startTime = new Date(start).toTimeString().slice(0, 5);
-    this._endTime = new Date(end).toTimeString().slice(0, 5);
+    this._start = new Date(start);
+    this._end = new Date(end);
     this._offers = offers;
     this._isFavorite = isFavorite;
+
     this._subscribeOnTypeChange();
     this._subscribeOnCityChange();
-    this._onDataChange = onDataChange;
-
+    this._getDate();
   }
 
-  _subscribeOnTypeChange() {
-    const label = this.getElement().querySelector(`.event__type-output`);
-    // const img = this.getElement().querySelector(`.event__type-icon`);
-    const offersContainer = this.getElement().querySelector(`.event__available-offers`);
-    const onTypeChange = (evt) => {
-      const newType = TYPES_OF_EVENT.find((type) => type.type === evt.target.value);
-      label.textContent = newType.title;
-      // img.src = `img/icons/${newType.type}.png`;
-      this._type.type = newType.type;
-      offersContainer.innerHTML = this._getOffers(newType);
-    };
-    this._onDataChange();
-
-    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
-  }
-
-
-  _getOffers(newType) {
-    return Array.from(newType.options).map((option) => {
-      return `<div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}">
-                <label class="event__offer-label" for="event-offer-${option.id}-1">
-                  <span class="event__offer-title">${option.option}</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">${option.price}</span>
-                </label>
-              </div>`;
-    }).join(``);
-  }
-
-
-  _subscribeOnCityChange() {
-    const onCityChange = (evt) => {
-      const description = this.getElement().querySelector(`.event__destination-description`);
-      const photosContainer = this.getElement().querySelector(`.event__photos-tape`);
-      if (evt.target.value) {
-        const newType = CITIES[CITIES.findIndex((it) => it.city === evt.target.value)];
-        description.textContent = newType.description;
-        photosContainer.innerHTML = this._getPhotos(newType);
-        this._onDataChange(newType);
-
-      }
-    };
-    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
-  }
-
-  _getPhotos(newType) {
-    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
-  }
-
-  recoveryListeners() {
-    this._subscribeOnTypeChange();
-    this._subscribeOnCityChange();
-  }
-
-  rerender() {
-    super.rerender();
-  }
 
   getTemplate() {
     return `<li class="trip-events__item">
@@ -126,17 +71,16 @@ export default class EventEdit extends AbstractSmartComponent {
         </datalist>
       </div>
 
-
       <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-1">
         From
       </label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${this._start} ${this._startTime}">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${moment(this._start).format()}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">
         To
       </label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${this._end} ${this._endTime}">
+      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${moment(this._end).format()}">
     </div>
         <div class="event__field-group  event__field-group--price">
           <label class="event__label" for="event-price-1">
@@ -167,7 +111,7 @@ export default class EventEdit extends AbstractSmartComponent {
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
-          ${OPTIONS.map((option) =>`<div class="event__offer-selector">
+          ${Array.from(this._type.options).map((option) =>`<div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}" ${(Array.from(this._offers).filter((offer) => offer.option === option.option)).length > 0 ? `checked` : ``}>
               <label class="event__offer-label" for="event-offer-${option.id}-1">
                 <span class="event__offer-title">${option.option}</span>
@@ -193,4 +137,66 @@ export default class EventEdit extends AbstractSmartComponent {
     </li>`;
   }
 
+  _getDate() {
+    flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._start,
+      altFormat: `d.m.y H:i`,
+      enableTime: true
+    });
+
+    flatpickr((this.getElement().querySelector(`#event-end-time-1`)), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._end,
+      altFormat: `d.m.y H:i`,
+      enableTime: true
+    });
+  }
+
+  _subscribeOnTypeChange() {
+    const onTypeChange = (evt) => {
+      this._type = TYPES_OF_EVENT.find((type) => type.type === evt.target.value);
+      this.rerender();
+    };
+    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
+  }
+
+  /* _getOffers(newType) {
+    return Array.from(newType.options).map((option) => {
+      return `<div class="event__offer-selector">
+                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}">
+                <label class="event__offer-label" for="event-offer-${option.id}-1">
+                  <span class="event__offer-title">${option.option}</span>
+                  &plus;
+                  &euro;&nbsp;<span class="event__offer-price">${option.price}</span>
+                </label>
+              </div>`;
+    }).join(``);
+  }*/
+
+  _subscribeOnCityChange() {
+    const onCityChange = (evt) => {
+      if (evt.target.value) {
+        this._city = evt.target.value;
+        this.rerender();
+      }
+    };
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
+  }
+
+  /* _getPhotos(newType) {
+    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
+  }*/
+
+  recoveryListeners() {
+    this._subscribeOnTypeChange();
+    this._subscribeOnCityChange();
+    this._getDate();
+  }
+
+  rerender() {
+    super.rerender();
+  }
 }

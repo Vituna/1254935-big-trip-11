@@ -87,7 +87,6 @@ export default class TripController {
 
   _onDataChange(newData, oldData) {
     this._eventsData[this._eventsData.findIndex((it) => it === oldData)] = newData;
-    this.rerender();
   }
 
   _onChangeView() {
