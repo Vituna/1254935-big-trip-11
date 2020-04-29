@@ -31,7 +31,6 @@ export default class EventEdit extends AbstractSmartComponent {
     this._getDate();
   }
 
-
   getTemplate() {
     return `<li class="trip-events__item">
     <form class="event  event--edit" action="#" method="post">
