@@ -1,6 +1,6 @@
 import AbstractComponent from "./abstract-component.js";
-
-const OFFERS_COUNT = 3;
+import moment from 'moment';
+const OFFERS_COUNT = 4;
 
 export default class Event extends AbstractComponent {
   constructor({
@@ -9,8 +9,6 @@ export default class Event extends AbstractComponent {
     price,
     start,
     end,
-    hours,
-    minutes,
     offers
   }) {
     super();
@@ -19,26 +17,34 @@ export default class Event extends AbstractComponent {
     this._price = price;
     this._start = new Date(start);
     this._end = new Date(end);
-    this._hours = hours;
-    this._minutes = minutes;
     this._offers = offers;
+    this._hours = Math.trunc((end - start) / 1000 / 60 / 60);
+    this._minutes = Math.trunc(((end - start) / 1000 / 60 / 60 - this._hours) * 60);
+  }
+
+  _getDuration(startTime, endTime) {
+    const start = moment(startTime);
+    const end = moment(endTime);
+    const duration = moment.duration(end.diff(start));
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+    const days = duration.days();
+    return `${days ? `${days}D` : ``} ${hours ? `${hours}H` : ``} ${minutes}M`;
   }
 
   getTemplate() {
     return `<li class="trip-events__item">
     <div class="event">
       <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.split(` `)[0].toLowerCase()}.png" alt="Event type icon">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${this._type} ${this._city}</h3>
+      <h3 class="event__title">${this._type.title} ${this._city}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${this._start.toString().slice(4, 21)}">${this._start.toTimeString().slice(0, 5)}</time>
-          &mdash;
-          <time class="event__end-time" datetime="${this._end.toString().slice(4, 21)}">${this._end.toTimeString().slice(0, 5)}</time>
-        </p>
-        <p class="event__duration">${this._hours}H ${this._minutes}M</p>
+          <time class="event__start-time" datetime="${moment(this._start).format()}">${moment(this._start).format(`h:mm`)}</time>          &mdash;
+          <time class="event__end-time" datetime="${moment(this._end).format()}">${moment(this._end).format(`h:mm`)}</time>        </p>
+          <p class="event__duration">${this._getDuration(this._start, this._end)}</p>
       </div>
 
       <p class="event__price">
@@ -59,6 +65,5 @@ export default class Event extends AbstractComponent {
       </button>
     </div>
   </li>`;
-
   }
 }

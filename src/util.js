@@ -47,9 +47,14 @@ export const remove = (element) => {
   }
 };
 
-export const formatDate = (date) => {
-  let day = date.getDate();
-  let month = date.getMonth() + 1;
-  let year = date.getFullYear() % 100;
-  return `${day < 10 ? `0${day}` : day}.${month < 10 ? `0${month}` : month}.${year < 10 ? `0${year}` : year}`;
+export const getEventsInDays = (eventsData) => {
+  return eventsData.reduce((acc, event) => {
+    const date = new Date(event.start).toDateString();
+    if (acc[date]) {
+      acc[date].push(event);
+    } else {
+      acc[date] = [event];
+    }
+    return acc;
+  }, {});
 };

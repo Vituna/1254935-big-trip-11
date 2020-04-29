@@ -1,30 +1,36 @@
-import {formatDate} from "./../util.js";
-import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, CITIES, OPTIONS} from "./../const.js";
-import AbstractComponent from "./abstract-component.js";
+import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT, CITIES} from "./../const.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
+import flatpickr from 'flatpickr';
+import moment from 'moment';
 
-export default class EventEdit extends AbstractComponent {
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
+
+export default class EventEdit extends AbstractSmartComponent {
   constructor({
     type,
     city,
     price,
-    description,
     start,
     end,
     offers,
-    urls
+    isFavorite,
+
   }) {
     super();
     this._type = type;
     this._city = city;
     this._price = price;
-    this._description = description;
-    this._start = formatDate(new Date(start));
-    this._end = formatDate(new Date(end));
-    this._startTime = new Date(start).toTimeString().slice(0, 5);
-    this._endTime = new Date(end).toTimeString().slice(0, 5);
+    this._start = new Date(start);
+    this._end = new Date(end);
     this._offers = offers;
-    this._urls = urls;
+    this._isFavorite = isFavorite;
+
+    this._subscribeOnTypeChange();
+    this._subscribeOnCityChange();
+    this._getDate();
   }
+
 
   getTemplate() {
     return `<li class="trip-events__item">
@@ -33,7 +39,7 @@ export default class EventEdit extends AbstractComponent {
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${this._type.split(` `)[0].toLowerCase()}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${this._type.type}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -41,15 +47,15 @@ export default class EventEdit extends AbstractComponent {
           <fieldset class="event__type-group">
           <legend class="visually-hidden">Transfer</legend>
           ${TYPES_OF_TRANSFER.map((transferType) => `<div class="event__type-item">
-          <input id="event-type-${transferType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${transferType.split(` `)[0].toLowerCase()}">
-          <label class="event__type-label  event__type-label--${transferType.split(` `)[0].toLowerCase()}" for="event-type-${transferType.split(` `)[0].toLowerCase()}-1">${transferType.split(` `)[0]}</label>
+          <input id="event-type-${transferType.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${transferType.type}" ${transferType.type === this._type.type ? `checked` : ``}>
+          <label class="event__type-label  event__type-label--${transferType.type}" for="event-type-${transferType.type}-1">${transferType.type}</label>
         </div>`).join(``)}
         </fieldset>
         <fieldset class="event__type-group">
           <legend class="visually-hidden">Activity</legend>
           ${TYPES_OF_ACTIVITY.map((activityType) => `<div class="event__type-item">
-          <input id="event-type-${activityType.split(` `)[0].toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${activityType.split(` `)[0].toLowerCase()}">
-          <label class="event__type-label  event__type-label--${activityType.split(` `)[0].toLowerCase()}" for="event-type-${activityType.split(` `)[0].toLowerCase()}-1">${activityType.split(` `)[0]}</label>
+          <input id="event-type-${activityType.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${activityType.type}" ${activityType.type === this._type.type ? `checked` : ``}>
+          <label class="event__type-label  event__type-label--${activityType.type}" for="event-type-${activityType.type}-1">${activityType.type}</label>
         </div>`).join(``)}
         </fieldset>
           </div>
@@ -57,25 +63,24 @@ export default class EventEdit extends AbstractComponent {
 
         <div class="event__field-group  event__field-group--destination">
         <label class="event__label  event__type-output" for="event-destination-1">
-          ${this._type}
+          ${this._type.type}
         </label>
         <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._city}" list="destination-list-1">
         <datalist id="destination-list-1">
-          ${CITIES.map((CITY) => `<option value="${CITY}"></option>`)}
+          ${CITIES.map((destination) => `<option value="${destination.city}"></option>`).join(``)}
         </datalist>
       </div>
-
 
       <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-1">
         From
       </label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${this._start} ${this._startTime}">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${moment(this._start).format()}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">
         To
       </label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${this._end} ${this._endTime}">
+      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${moment(this._end).format()}">
     </div>
         <div class="event__field-group  event__field-group--price">
           <label class="event__label" for="event-price-1">
@@ -88,7 +93,7 @@ export default class EventEdit extends AbstractComponent {
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
         <button class="event__reset-btn" type="reset">Delete</button>
 
-        <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" checked>
+        <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
@@ -106,7 +111,7 @@ export default class EventEdit extends AbstractComponent {
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
-          ${OPTIONS.map((option) =>`<div class="event__offer-selector">
+          ${Array.from(this._type.options).map((option) =>`<div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}" ${(Array.from(this._offers).filter((offer) => offer.option === option.option)).length > 0 ? `checked` : ``}>
               <label class="event__offer-label" for="event-offer-${option.id}-1">
                 <span class="event__offer-title">${option.option}</span>
@@ -119,16 +124,79 @@ export default class EventEdit extends AbstractComponent {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${this._description}</p>
+          <p class="event__destination-description">${CITIES.find((destination) => destination.city === this._city).description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-            ${this._urls.map((url) => `<img class="event__photo" src=${url} alt="Event photo">`).join(``)}
+            ${CITIES.filter((destination) => destination.city === this._city).map((destination) => destination.urls.map((url) => `<img class="event__photo" src=${url} alt="Event photo">`).join(``))}
             </div>
           </div>
         </section>
       </section>
     </form>
     </li>`;
+  }
+
+  _getDate() {
+    flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._start,
+      altFormat: `d.m.y H:i`,
+      enableTime: true
+    });
+
+    flatpickr((this.getElement().querySelector(`#event-end-time-1`)), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._end,
+      altFormat: `d.m.y H:i`,
+      enableTime: true
+    });
+  }
+
+  _subscribeOnTypeChange() {
+    const onTypeChange = (evt) => {
+      this._type = TYPES_OF_EVENT.find((type) => type.type === evt.target.value);
+      this.rerender();
+    };
+    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
+  }
+
+  /* _getOffers(newType) {
+    return Array.from(newType.options).map((option) => {
+      return `<div class="event__offer-selector">
+                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}">
+                <label class="event__offer-label" for="event-offer-${option.id}-1">
+                  <span class="event__offer-title">${option.option}</span>
+                  &plus;
+                  &euro;&nbsp;<span class="event__offer-price">${option.price}</span>
+                </label>
+              </div>`;
+    }).join(``);
+  }*/
+
+  _subscribeOnCityChange() {
+    const onCityChange = (evt) => {
+      if (evt.target.value) {
+        this._city = evt.target.value;
+        this.rerender();
+      }
+    };
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
+  }
+
+  /* _getPhotos(newType) {
+    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
+  }*/
+
+  recoveryListeners() {
+    this._subscribeOnTypeChange();
+    this._subscribeOnCityChange();
+    this._getDate();
+  }
+
+  rerender() {
+    super.rerender();
   }
 }
