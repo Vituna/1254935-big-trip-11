@@ -31,7 +31,6 @@ export default class EventEdit extends AbstractSmartComponent {
     this._getDate();
   }
 
-
   getTemplate() {
     return `<li class="trip-events__item">
     <form class="event  event--edit" action="#" method="post">
@@ -163,19 +162,6 @@ export default class EventEdit extends AbstractSmartComponent {
     this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
   }
 
-  /* _getOffers(newType) {
-    return Array.from(newType.options).map((option) => {
-      return `<div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${option.id}-1" type="checkbox" name="event-offer-${option.id}">
-                <label class="event__offer-label" for="event-offer-${option.id}-1">
-                  <span class="event__offer-title">${option.option}</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">${option.price}</span>
-                </label>
-              </div>`;
-    }).join(``);
-  }*/
-
   _subscribeOnCityChange() {
     const onCityChange = (evt) => {
       if (evt.target.value) {
@@ -185,10 +171,6 @@ export default class EventEdit extends AbstractSmartComponent {
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
-
-  /* _getPhotos(newType) {
-    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
-  }*/
 
   recoveryListeners() {
     this._subscribeOnTypeChange();
