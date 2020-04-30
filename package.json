@@ -29,7 +29,6 @@
     "node": "10"
   },
   "dependencies": {
-    "flatpickr": "4.6.2",
     "moment": "2.24.0",
     "moment-locales-webpack-plugin": "1.2.0",
     "chart": "0.1.2",
