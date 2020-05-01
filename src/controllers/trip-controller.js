@@ -1,3 +1,6 @@
+const FORMAT_DATA = 100 * 60 * 60 * 24 * 1000 / 24;
+
+
 import Day from '../components/point_day.js';
 import Sort from '../components/sorting.js';
 import NoPoint from '../components/no_points.js';
@@ -95,7 +98,7 @@ export default class TripController {
     const eventsListSort = this._sortOrFilterEventsContainer.getElement().querySelector(`.trip-events__list`);
     eventsListSort.innerHTML = ``;
 
-    const date = Date.now() + 100 * 60 * 60 * 24 * 1000 / 24;
+    const date = Date.now() + FORMAT_DATA;
     switch (evt.target.textContent) {
       case `Future`:
         const futureEvents = this._eventsData.filter((event) => {

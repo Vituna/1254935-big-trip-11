@@ -59,11 +59,11 @@ export default class PointController {
 
     this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, (evt) => {
       evt.preventDefault();
-      const formData = new FormData(this._eventEdit.getElement().querySelector(`.event--edit`));
+      const formData = new FormData(evt.target);
       const entry = {
-        type: TYPES_OF_EVENT.find(evt.target),
+        type: TYPES_OF_EVENT.find((it) => it.type === formData.get(`event-type`)),
         city: formData.get(`event-destination`),
-        price: +formData.get(`event-price`),
+        price: formData.get(`event-price`),
         start: new Date(formData.get(`event-start-time`)),
         end: new Date(formData.get(`event-end-time`)),
         offers: OPTIONS.filter((option) => {
