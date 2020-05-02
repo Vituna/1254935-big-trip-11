@@ -1,5 +1,6 @@
 import AbstractComponent from "./abstract-component.js";
 import moment from 'moment';
+import 'moment-duration-format';
 const OFFERS_COUNT = 4;
 
 export default class Event extends AbstractComponent {
@@ -25,11 +26,8 @@ export default class Event extends AbstractComponent {
   _getDuration(startTime, endTime) {
     const start = moment(startTime);
     const end = moment(endTime);
-    const duration = moment.duration(end.diff(start));
-    const hours = duration.hours();
-    const minutes = duration.minutes();
-    const days = duration.days();
-    return `${days ? `${days}D` : ``} ${hours ? `${hours}H` : ``} ${minutes}M`;
+    const difference = end.diff(start);
+    return moment.duration(difference, `milliseconds`).format(`dd[d] hh[h] mm[m]`);
   }
 
   getTemplate() {

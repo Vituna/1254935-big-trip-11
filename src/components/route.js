@@ -1,15 +1,16 @@
 import AbstractComponent from "./abstract-component.js";
 
 export default class TripInfo extends AbstractComponent {
-  constructor(cities, eventsData, price) {
+  constructor(eventsData, price) {
     super();
+    this._eventsData = eventsData;
     this._price = price;
-    this._cities = cities;
-    this._startCity = cities[0];
-    this._middleCity = cities.length > 3 ? `...` : cities[1];
-    this._endCity = cities[cities.length - 1];
-    this._dateStartTrip = new Date(eventsData[0].start).toDateString().slice(4, 10);
-    this._dateEndTrip = new Date(eventsData[eventsData.length - 1].end).toDateString().slice(4, 10);
+    this._cities = eventsData.sort((a, b) => a.start - b.start).map((it) => it.city);
+    this._startCity = this._cities[0];
+    this._middleCity = this._cities.length > 3 ? `...` : this._cities[1];
+    this._endCity = this._cities[this._cities.length - 1];
+    this._dateStartTrip = new Date(this._eventsData[0].start).toDateString().slice(4, 10);
+    this._dateEndTrip = new Date(this._eventsData[this._eventsData.length - 1].end).toDateString().slice(4, 10);
   }
 
   getTemplate() {

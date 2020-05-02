@@ -1,9 +1,10 @@
 import Event from '../components/point.js';
 import EventEdit from '../components/create.js';
 import {OPTIONS, TYPES_OF_EVENT} from "../const";
+import {render, remove, RenderPosition} from "../util.js";
 
 export default class PointController {
-  constructor(eventData, container, onDataChange, onChangeView) {
+  constructor(addButton, eventData, mode, container, onDataChange, onChangeView) {
     this._container = container;
     this._eventData = eventData;
     this._event = new Event(eventData);
@@ -11,11 +12,18 @@ export default class PointController {
     this._onDataChange = onDataChange;
     this._onChangeView = onChangeView;
 
-    this.create();
+    this.create(mode);
   }
 
-  create() {
-    this._container.append(this._event.getElement());
+  create(mode) {
+    let currentView = this._event.getElement();
+    let position = RenderPosition.PREPEND;
+    if (mode === `add`) {
+      currentView = this._eventEdit.getElement().querySelector(`form`);
+      position = RenderPosition.APPEND;
+      currentView.classList.add(`trip-events__item`);
+      currentView.querySelector(`.event__rollup-btn`).remove();
+    }
 
     const onEscKeydown = (evt) => {
       if (evt.key === `Esc` || evt.key === `Escape`) {
@@ -31,14 +39,27 @@ export default class PointController {
       document.addEventListener(`keydown`, onEscKeydown);
     });
 
-    this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
-      this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+    if (mode === `default`) {
+      this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+        this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+        document.removeEventListener(`keydown`, onEscKeydown);
+      });
+    }
+
+    this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, (evt) => {
+      evt.preventDefault();
+      if (mode === `add`) {
+        this._onDataChange(``, ``);
+        remove(currentView);
+      } else {
+        this._onDataChange(null, this._eventData);
+      }
       document.removeEventListener(`keydown`, onEscKeydown);
     });
 
     this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, (evt) => {
       evt.preventDefault();
-      const formData = new FormData(this._eventEdit.getElement().querySelector(`.event--edit`));
+      const formData = new FormData(evt.target);
       const entry = {
         type: TYPES_OF_EVENT.find((it) => it.type === formData.get(`event-type`)),
         city: formData.get(`event-destination`),
@@ -50,11 +71,15 @@ export default class PointController {
         }),
         isFavorite: formData.get(`event-favorite`) === `on` ? true : false,
       };
-      this._onDataChange(entry, this._eventData);
-
+      this._onDataChange(entry, mode === `add` ? null : this._eventData);
+      if (mode === `add`) {
+        remove(currentView);
+      }
       document.removeEventListener(`keydown`, onEscKeydown);
     });
+    render(this._container, currentView, position);
   }
+
   setDefaultView() {
     if (this._container.contains(this._eventEdit.getElement())) {
       this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());

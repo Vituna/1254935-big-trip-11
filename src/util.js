@@ -37,8 +37,20 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const render = (container, element) => {
-  container.append(element);
+export const RenderPosition = {
+  PREPEND: `prepend`,
+  APPEND: `append`,
+};
+
+export const render = (container, element, position) => {
+  switch (position) {
+    case RenderPosition.PREPEND:
+      container.prepend(element);
+      break;
+    case RenderPosition.APPEND:
+      container.append(element);
+      break;
+  }
 };
 
 export const remove = (element) => {
