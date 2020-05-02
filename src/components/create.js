@@ -1,7 +1,12 @@
-import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT, CITIES, OPTIONS} from "./../const.js";
+import {
+  TYPES_OF_TRANSFER,
+  TYPES_OF_ACTIVITY,
+  TYPES_OF_EVENT,
+  DESTINATIONS,
+  OPTIONS
+} from "./../const.js";
 import AbstractComponent from "./abstract-component.js";
 import flatpickr from 'flatpickr';
-
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
@@ -29,7 +34,6 @@ export default class EventEdit extends AbstractComponent {
     this._subscribeOnCityChange();
     this._addFlatpickr();
   }
-
   _addFlatpickr() {
     flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
       altInput: true,
@@ -55,6 +59,7 @@ export default class EventEdit extends AbstractComponent {
       img.src = `img/icons/${newType.type}.png`;
       offersContainer.innerHTML = this._getOffers(newType);
       this.rerender();
+
     };
     this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
   }
@@ -70,7 +75,6 @@ export default class EventEdit extends AbstractComponent {
           </div>`;
     }).join(``);
   }
-
   _getFirstDescription(newType) {
     return `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -82,13 +86,12 @@ export default class EventEdit extends AbstractComponent {
     </div>
   </section>`;
   }
-
   _subscribeOnCityChange() {
     const eventDetailsContainer = this.getElement().querySelector(`.event__details`);
     const onCityChange = (evt) => {
 
       if (evt.target.value) {
-        const newType = CITIES.find((it) => it.city === evt.target.value);
+        const newType = DESTINATIONS.find((it) => it.city === evt.target.value);
         const destination = this.getElement().querySelector(`.event__section--destination`);
         if (!destination) {
           eventDetailsContainer.insertAdjacentHTML(`beforeend`, this._getFirstDescription(newType));
@@ -101,11 +104,8 @@ export default class EventEdit extends AbstractComponent {
       }
       this.rerender();
     };
-    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
-  }
 
-  _getPhotos(newType) {
-    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
 
   rerender() {
@@ -116,6 +116,10 @@ export default class EventEdit extends AbstractComponent {
     this._subscribeOnTypeChange();
     this._subscribeOnCityChange();
     this._addFlatpickr();
+  }
+
+  _getPhotos(newType) {
+    return newType.urls.map((it) => `<img class="event__photo" src=${it} alt="Event photo">`).join(``);
   }
 
   getTemplate() {
@@ -151,7 +155,7 @@ export default class EventEdit extends AbstractComponent {
         </label>
         <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._city}" list="destination-list-1">
         <datalist id="destination-list-1">
-          ${CITIES.map((cities) => `<option value="${cities.city}"></option>`).join(``)}
+          ${DESTINATIONS.map((destination) => `<option value="${destination.city}"></option>`).join(``)}
         </datalist>
       </div>
       <div class="event__field-group  event__field-group--time">
@@ -201,10 +205,10 @@ export default class EventEdit extends AbstractComponent {
         </section>
         ${this._city ? `${`<section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${(CITIES.find((it) => it.city === this._city) || {}).cities || ``}</p>
+        <p class="event__destination-description">${(DESTINATIONS.find((it) => it.city === this._city) || {}).description || ``}</p>
         <div class="event__photos-container">
           <div class="event__photos-tape">
-          ${CITIES.find((sities) => sities.city === this._city).urls.map((url) => `<img class="event__photo" src=${url} alt="Event photo">`).join(``)}
+          ${DESTINATIONS.find((destination) => destination.city === this._city).urls.map((url) => `<img class="event__photo" src=${url} alt="Event photo">`).join(``)}
           </div>
         </div>
       </section>`} ` : ``}
