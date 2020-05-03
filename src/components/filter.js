@@ -1,6 +1,10 @@
 import AbstractComponent from "./abstract-component.js";
 
 export default class Filters extends AbstractComponent {
+  constructor(filtersNames) {
+    super();
+    this._filtersNames = filtersNames;
+  }
 
   getTemplate() {
     return `<form class="trip-filters" action="#" method="get">

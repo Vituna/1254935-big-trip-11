@@ -14,7 +14,7 @@ const DESCRIPTIONS = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`
   `Aliquam id orci ut lectus varius viverra.`,
   `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.`];
 
-export const CITIES = [{
+export const DESTINATIONS = [{
   city: `St.Petersburg`,
   description: Array.from(new Set(getRandomArray(1, 3, DESCRIPTIONS))).join(``),
   urls: Array.from(new Set(getArray(1, 5))),
@@ -135,7 +135,7 @@ const getEvent = () => {
   const end = start + residual;
   return {
     type,
-    city: getRandomElement(CITIES).city,
+    city: getRandomElement(DESTINATIONS).city,
     price: getRandomInteger(0, 1000),
     start,
     end,

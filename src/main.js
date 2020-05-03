@@ -3,6 +3,7 @@ const EVENT_COUNT = 10;
 import Menu from './components/site-menu.js';
 import Filters from './components/filter.js';
 import TripInfo from './components/route.js';
+// import PointAdd from './components/point_add.js';
 import Stats from './components/stats.js';
 import TripController from './controllers/trip-controller.js';
 
@@ -23,18 +24,16 @@ const tripInfo = document.querySelector(`.trip-main`);
 const addButton = document.querySelector(`.trip-main__event-add-btn`);
 
 let eventsData = getEventsData(EVENT_COUNT);
-const price = getPrice(eventsData);
+let price = getPrice(eventsData);
 
 const menu = new Menu();
 const filters = new Filters(filtersNames);
 const stats = new Stats();
-
 const renderInfo = () => {
   const info = new TripInfo(eventsData, price);
   render(tripInfo, info.getElement(), RenderPosition.PREPEND);
   return info.getElement();
 };
-
 let info = renderInfo();
 
 const onDataChange = (events) => {
@@ -54,6 +53,7 @@ if (eventsData.length > 0) {
   tripController.init();
 }
 
+
 const onAddButtonClick = () => {
   addButton.disabled = true;
   tripController.createEvent(addButton);
@@ -65,6 +65,7 @@ const onAddButtonClick = () => {
 };
 
 const onMenuClick = (evt) => {
+
   if (evt.target.tagName !== `A`) {
     return;
   }
@@ -82,10 +83,6 @@ const onMenuClick = (evt) => {
   }
 };
 
-const onFilterClick = () => {
-  tripController.init();
-};
 
 menu.getElement().addEventListener(`click`, onMenuClick);
 addButton.addEventListener(`click`, onAddButtonClick);
-filters.getElement().addEventListener(`change`, onFilterClick);

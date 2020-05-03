@@ -1,7 +1,12 @@
 import Event from '../components/point.js';
 import EventEdit from '../components/create.js';
 import {OPTIONS, TYPES_OF_EVENT} from "../const";
-import {render, remove, RenderPosition} from "../util.js";
+
+import {
+  render,
+  remove,
+  RenderPosition
+} from "../util.js";
 
 export default class PointController {
   constructor(addButton, eventData, mode, container, onDataChange, onChangeView) {
@@ -44,12 +49,14 @@ export default class PointController {
         this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
         document.removeEventListener(`keydown`, onEscKeydown);
       });
+
     }
 
     this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, (evt) => {
       evt.preventDefault();
       if (mode === `add`) {
         this._onDataChange(``, ``);
+        // this._addButton.disabled = false;
         remove(currentView);
       } else {
         this._onDataChange(null, this._eventData);
@@ -74,12 +81,12 @@ export default class PointController {
       this._onDataChange(entry, mode === `add` ? null : this._eventData);
       if (mode === `add`) {
         remove(currentView);
+        // this._addButton.disabled = false;
       }
       document.removeEventListener(`keydown`, onEscKeydown);
     });
     render(this._container, currentView, position);
   }
-
   setDefaultView() {
     if (this._container.contains(this._eventEdit.getElement())) {
       this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
