@@ -6,7 +6,7 @@ const OFFERS_COUNT = 4;
 export default class Event extends AbstractComponent {
   constructor({
     type,
-    city,
+    destination,
     price,
     start,
     end,
@@ -14,15 +14,12 @@ export default class Event extends AbstractComponent {
   }) {
     super();
     this._type = type;
-    this._city = city;
+    this._city = destination.city;
     this._price = price;
     this._start = new Date(start);
     this._end = new Date(end);
-    this._offers = offers;
-    this._hours = Math.trunc((end - start) / 1000 / 60 / 60);
-    this._minutes = Math.trunc(((end - start) / 1000 / 60 / 60 - this._hours) * 60);
+    this._offers = offers.filter((it) => it.accepted);
   }
-
   _getDuration(startTime, endTime) {
     const start = moment(startTime);
     const end = moment(endTime);
@@ -34,15 +31,17 @@ export default class Event extends AbstractComponent {
     return `<li class="trip-events__item">
     <div class="event">
       <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.type}.png" alt="Event type icon">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.id}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${this._type.title} ${this._city}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${moment(this._start).format()}">${moment(this._start).format(`h:mm`)}</time>          &mdash;
-          <time class="event__end-time" datetime="${moment(this._end).format()}">${moment(this._end).format(`h:mm`)}</time>        </p>
-          <p class="event__duration">${this._getDuration(this._start, this._end)}</p>
+          <time class="event__start-time" datetime="${moment(this._start).format()}">${moment(this._start).format(`h:mm`)}</time>
+          &mdash;
+          <time class="event__end-time" datetime="${moment(this._end).format()}">${moment(this._end).format(`h:mm`)}</time>
+        </p>
+        <p class="event__duration">${this._getDuration(this._start, this._end)}</p>
       </div>
 
       <p class="event__price">
@@ -51,8 +50,8 @@ export default class Event extends AbstractComponent {
 
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${Array.from(this._offers).slice(0, OFFERS_COUNT).map((offer) => `<li class="event__offer">
-      <span class="event__offer-title">${offer.option}</span>
+      ${this._offers.slice(0, OFFERS_COUNT).map((offer) => `<li class="event__offer">
+      <span class="event__offer-title">${offer.title}</span>
       &plus;
       &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
      </li>`).join(``)}
@@ -63,5 +62,6 @@ export default class Event extends AbstractComponent {
       </button>
     </div>
   </li>`;
+
   }
 }
