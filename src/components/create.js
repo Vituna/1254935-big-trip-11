@@ -30,7 +30,7 @@ export default class EventEdit extends AbstractComponent {
     this._offers = offers;
 
     this._isFavorite = isFavorite;
-    this._subscribeOnTypeChange();
+    // this._subscribeOnTypeChange();
     this._subscribeOnCityChange();
     this._addFlatpickr();
   }
