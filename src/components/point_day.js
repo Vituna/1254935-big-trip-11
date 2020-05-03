@@ -7,6 +7,7 @@ export default class Day extends AbstractComponent {
     this._dayIndex = index + 1;
     this._date = new Date(date);
   }
+
   getTemplate() {
     return `<li class="trip-days__item  day">
     <div class="day__info">

@@ -4,23 +4,20 @@ const MIN_CTX_HEIGHT = 130;
 import AbstractComponent from "./abstract-component.js";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import {TYPES_OF_TRANSFER} from "./../const.js";
+import {TYPES_OF_TRANSFER} from "../const.js";
 import moment from 'moment';
 import 'moment-duration-format';
 
 export default class Stats extends AbstractComponent {
   getTemplate() {
-    return `<section class="statistics">
+    return `<section class="statistics visually-hidden">
     <h2 class="visually-hidden">Trip statistics</h2>
-
     <div class="statistics__item statistics__item--money">
       <canvas class="statistics__chart  statistics__chart--money" width="900"></canvas>
     </div>
-
     <div class="statistics__item statistics__item--transport">
       <canvas class="statistics__chart  statistics__chart--transport" width="900"></canvas>
     </div>
-
     <div class="statistics__item statistics__item--time-spend">
       <canvas class="statistics__chart  statistics__chart--time" width="900"></canvas>
     </div>
@@ -35,20 +32,24 @@ export default class Stats extends AbstractComponent {
     this.getElement().classList.remove(`visually-hidden`);
   }
 
-  getStatistics(eventsData) {
+  update(eventsData) {
+    this._moneyChart.destroy();
+    this._transportChart.destroy();
+    this._timeSpendChart.destroy();
+    this.getStatistics(eventsData);
+  }
 
+  getStatistics(eventsData) {
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeCtx = this.getElement().querySelector(`.statistics__chart--time`);
-
-    const types = Array.from(new Set(eventsData.map((it) => it.type.type.toUpperCase())));
-
+    const types = Array.from(new Set(eventsData.map((it) => it.type.id.toUpperCase())));
     const money = eventsData.map((it) => it.price);
-    Chart.defaults.global.defaultFontColor = `black`;
-    Chart.defaults.global.defaultFontFamily = `"Montserrat", "Arial", sans-serif`;
-    Chart.defaults.global.defaultFontSize = 114;
 
     moneyCtx.height = BAR_HEIGHT * types.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * types.length : MIN_CTX_HEIGHT;
+    Chart.defaults.global.defaultFontColor = `black`;
+    Chart.defaults.global.defaultFontFamily = `"Montserrat", "Arial", sans-serif`;
+    Chart.defaults.global.defaultFontSize = 14;
 
     this._moneyChart = new Chart(moneyCtx, {
       plugins: [ChartDataLabels],
@@ -92,7 +93,7 @@ export default class Stats extends AbstractComponent {
               display: false,
               drawBorder: false
             },
-            barThickness: 55,
+            barThickness: 44,
           }],
           xAxes: [{
             ticks: {
@@ -116,11 +117,10 @@ export default class Stats extends AbstractComponent {
 
     });
 
-
-    const TRANSFERS = TYPES_OF_TRANSFER.map((it) => it.type);
-    const events = eventsData.filter((type) => TRANSFERS.find((it) => type.type.type === it));
+    const transfers = TYPES_OF_TRANSFER.map((it) => it.id);
+    const events = eventsData.filter((event) => transfers.find((it) => event.type.id === it));
     const transportCount = events.reduce((acc, event) => {
-      const type = event.type.type.toUpperCase();
+      const type = event.type.id.toUpperCase();
       if (acc[type]) {
         acc[type] += 1;
       } else {
@@ -128,11 +128,10 @@ export default class Stats extends AbstractComponent {
       }
       return acc;
     }, {});
-
     const transports = Object.keys(transportCount);
     const counts = Object.values(transportCount);
-    transportCtx.height = BAR_HEIGHT * transports.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * transports.length : MIN_CTX_HEIGHT;
 
+    transportCtx.height = BAR_HEIGHT * transports.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * transports.length : MIN_CTX_HEIGHT;
     this._transportChart = new Chart(transportCtx, {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
@@ -200,7 +199,7 @@ export default class Stats extends AbstractComponent {
     });
 
     const timeinCities = events.reduce((acc, event) => {
-      const city = event.city.toUpperCase();
+      const city = event.destination.city.toUpperCase();
       const start = moment(event.start);
       const end = moment(event.end);
       const time = end.diff(start, `hours`);
@@ -211,11 +210,10 @@ export default class Stats extends AbstractComponent {
       }
       return acc;
     }, {});
-
     const cities = Object.keys(timeinCities);
-    const time = (Object.values(timeinCities).map((it) => it.reduce((a, b) =>(a + b))));
-    timeCtx.height = BAR_HEIGHT * cities.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * cities.length : MIN_CTX_HEIGHT;
+    const time = (Object.values(timeinCities).map((it) => it.reduce((a, b) => (a + b))));
 
+    timeCtx.height = BAR_HEIGHT * cities.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * cities.length : MIN_CTX_HEIGHT;
     this._timeSpendChart = new Chart(timeCtx, {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
@@ -279,7 +277,6 @@ export default class Stats extends AbstractComponent {
           enabled: false,
         }
       }
-
     });
   }
 }
