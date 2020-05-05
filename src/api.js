@@ -1,5 +1,5 @@
 import ModelEvent from './models/model-point.js';
-import ModelOffers from './models/model-point.js';
+// import ModelOffers from './models/model-point.js';
 import ModelDestinations from './models/model-destinations.js';
 
 export const API = class {
@@ -12,8 +12,8 @@ export const API = class {
     return this._load({
       url: `${this._url}offers`
     })
-    .then((response) => response.json())
-    .then(ModelOffers.parseOffers);
+    .then((response) => response.json());
+    // .then(ModelOffers.parseOffers);
   }
   getDestinations() {
     return this._load({
