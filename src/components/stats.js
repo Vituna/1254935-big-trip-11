@@ -1,12 +1,12 @@
-const BAR_HEIGHT = 55;
-const MIN_CTX_HEIGHT = 130;
-
 import AbstractComponent from "./abstract-component.js";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {TYPES_OF_TRANSFER} from "../const.js";
 import moment from 'moment';
 import 'moment-duration-format';
+
+const BAR_HEIGHT = 55;
+const MIN_CTX_HEIGHT = 130;
 
 export default class Stats extends AbstractComponent {
   getTemplate() {
@@ -43,13 +43,13 @@ export default class Stats extends AbstractComponent {
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeCtx = this.getElement().querySelector(`.statistics__chart--time`);
-    const types = Array.from(new Set(eventsData.map((it) => it.type.id.toUpperCase())));
+    const types = Array.from(new Set(eventsData.map((it) => it.type)));
     const money = eventsData.map((it) => it.price);
 
     moneyCtx.height = BAR_HEIGHT * types.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * types.length : MIN_CTX_HEIGHT;
     Chart.defaults.global.defaultFontColor = `black`;
     Chart.defaults.global.defaultFontFamily = `"Montserrat", "Arial", sans-serif`;
-    Chart.defaults.global.defaultFontSize = 14;
+    Chart.defaults.global.defaultFontSize = 15;
 
     this._moneyChart = new Chart(moneyCtx, {
       plugins: [ChartDataLabels],
@@ -67,7 +67,7 @@ export default class Stats extends AbstractComponent {
         plugins: {
           datalabels: {
             font: {
-              size: 13
+              size: 14
             },
             color: `#000000`,
             anchor: `end`,
@@ -79,7 +79,7 @@ export default class Stats extends AbstractComponent {
           display: true,
           text: `MONEY`,
           fontColor: `#000000`,
-          fontSize: 23,
+          fontSize: 24,
           position: `left`
         },
         scales: {
@@ -87,13 +87,13 @@ export default class Stats extends AbstractComponent {
             ticks: {
               fontColor: `#000000`,
               padding: 5,
-              fontSize: 13,
+              fontSize: 14,
             },
             gridLines: {
               display: false,
               drawBorder: false
             },
-            barThickness: 44,
+            barThickness: 45,
           }],
           xAxes: [{
             ticks: {
@@ -118,9 +118,9 @@ export default class Stats extends AbstractComponent {
     });
 
     const transfers = TYPES_OF_TRANSFER.map((it) => it.id);
-    const events = eventsData.filter((event) => transfers.find((it) => event.type.id === it));
+    const events = eventsData.filter((event) => transfers.find((it) => event.type === it));
     const transportCount = events.reduce((acc, event) => {
-      const type = event.type.id.toUpperCase();
+      const type = event.type.toUpperCase();
       if (acc[type]) {
         acc[type] += 1;
       } else {

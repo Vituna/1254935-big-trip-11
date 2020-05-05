@@ -1,4 +1,7 @@
 import AbstractComponent from "./abstract-component.js";
+const SHOW_CITIES_COUNT = 3;
+import moment from 'moment';
+
 
 export default class TripInfo extends AbstractComponent {
   constructor(eventsData, price) {
@@ -13,8 +16,8 @@ export default class TripInfo extends AbstractComponent {
     if (!this._eventsData) {
       return;
     }
-    this._dateStartTrip = new Date(this._eventsData[0].start).toDateString().slice(4, 10);
-    this._dateEndTrip = new Date(this._eventsData[this._eventsData.length - 1].end).toDateString().slice(4, 10);
+    this._dateStartTrip = moment(this._eventsData[0].start).format(`MMM DD`);
+    this._dateEndTrip = moment(this._eventsData[this._eventsData.length - 1].end).format(`MMM DD`);
   }
 
   _getCity() {
@@ -23,9 +26,9 @@ export default class TripInfo extends AbstractComponent {
     }
     this._cities = this._eventsData.sort((a, b) => a.start - b.start).map((it) => it.destination.city);
     this._startCity = this._cities[0];
-    if (this._cities.length > 3) {
+    if (this._cities.length > SHOW_CITIES_COUNT) {
       this._middleCity = `&mdash;...`;
-    } else if (this._cities.length < 3) {
+    } else if (this._cities.length < SHOW_CITIES_COUNT) {
       this._middleCity = ``;
     } else {
       this._middleCity = `&mdash; ${this._cities[1]}`;

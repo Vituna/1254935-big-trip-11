@@ -61,7 +61,7 @@ export const getPrice = ((eventsData) => {
   let price = 0;
   if (eventsData.length !== 0) {
     price = eventsData.map((event) => {
-      const offersPrice = Array.from(event.offers).reduce((a, b) => {
+      const offersPrice = event.offers.filter((it) => it.accepted).reduce((a, b) => {
         return a + b.price;
       }, 0);
       return event.price + offersPrice;
