@@ -1,5 +1,4 @@
 
-
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
@@ -37,4 +36,8 @@ export const getEventsInDays = (eventsData) => {
     }
     return acc;
   }, {});
+};
+
+export const objectToArray = (object) => {
+  return Object.keys(object).map((id) => object[id]);
 };

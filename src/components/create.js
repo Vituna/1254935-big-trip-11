@@ -18,7 +18,10 @@ export default class EventEdit extends AbstractSmartComponent {
     isFavorite
   }) {
     super();
-    this._type = type;
+    this._type = {
+      id: type,
+      title: TYPES_OF_EVENT.find((it) => it.id === type).title
+    };
     this._destination = destination;
     this._price = price;
 
