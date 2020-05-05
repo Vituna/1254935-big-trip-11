@@ -1,5 +1,5 @@
-import ModelEvent from './models/model-point.js';
-import {objectToArray} from './util.js';
+import ModelEvent from '../models/model-point.js';
+import {objectToArray} from '../util.js';
 
 const isOnline = () => {
   return window.navigator.onLine;

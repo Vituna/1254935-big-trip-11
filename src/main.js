@@ -4,9 +4,9 @@ import TripInfo from './components/route.js';
 import Stats from './components/stats.js';
 import TripController from './controllers/trip-controller.js';
 import LoadingMessage from './components/loading-message.js';
-import API from './api.js';
-import Store from './store.js';
-import Provider from './provider.js';
+import API from './api/api.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 import {filtersNames, ActionType, getPrice} from "./const.js";
 import {render, remove, RenderPosition} from "./util.js";
 
@@ -14,7 +14,7 @@ const tripControls = document.querySelector(`.trip-controls`);
 const tripEvents = document.querySelector(`.trip-events`);
 const tripInfo = document.querySelector(`.trip-main`);
 const addButton = document.querySelector(`.trip-main__event-add-btn`);
-const AUTORIZATION = `Basic HYYlckBwYXNzt89yIAo=`;
+const AUTORIZATION = `Basic dZZlckBwYXNyy29yZAo=`;
 const URL = `https://11.ecmascript.pages.academy/big-trip/`;
 const Keys = {
   EVENTS: `events-store-key`,

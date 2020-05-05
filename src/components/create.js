@@ -206,6 +206,7 @@ export default class EventEdit extends AbstractSmartComponent {
       } else {
         evt.target.setCustomValidity(`Please select a valid value.`);
       }
+      this.rerender();
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
