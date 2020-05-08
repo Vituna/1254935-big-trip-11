@@ -1,9 +1,9 @@
 import Day from '../components/point_day.js';
-import Sort from '../components/sorting.js';
-import Message from '../components/no_points.js';
-import SortContainer from '../components/sort_block';
+import Sort from '../components/sort.js';
+import NoPoints from '../components/no-points.js';
+import SortBlock from '../components/sort-block';
 import PointController from './point-controller.js';
-import DaysList from '../components/point_day_all.js';
+import PointDayAll from '../components/point-day-all.js';
 import {remove, getEventsInDays} from '../util.js';
 import {TYPES_OF_EVENT, ModeType} from '../const.js';
 
@@ -12,9 +12,9 @@ export default class TripController {
     this._container = container;
     this._creatingEvent = null;
     this._sort = new Sort();
-    this._message = new Message();
-    this._daysList = new DaysList();
-    this._sortOrFilterEventsContainer = new SortContainer();
+    this._message = new NoPoints();
+    this._daysList = new PointDayAll();
+    this._sortOrFilterEventsContainer = new SortBlock();
     this._onDataChange = onDataChange;
     this._subscriptions = [];
     this.onChangeView = this.onChangeView.bind(this);

@@ -1,6 +1,6 @@
 import AbstractComponent from "./abstract-component.js";
 
-export default class SortContainer extends AbstractComponent {
+export default class SortBlock extends AbstractComponent {
 
   getTemplate() {
     return `<li class="trip-days__item  day">

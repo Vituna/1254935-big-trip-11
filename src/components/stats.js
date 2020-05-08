@@ -43,7 +43,7 @@ export default class Stats extends AbstractComponent {
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeCtx = this.getElement().querySelector(`.statistics__chart--time`);
-    const types = Array.from(new Set(eventsData.map((it) => it.type)));
+    const types = Array.from(new Set(eventsData.map((it) => it.type.toUpperCase())));
     const money = eventsData.map((it) => it.price);
 
     moneyCtx.height = BAR_HEIGHT * types.length > MIN_CTX_HEIGHT ? BAR_HEIGHT * types.length : MIN_CTX_HEIGHT;
@@ -104,7 +104,7 @@ export default class Stats extends AbstractComponent {
               display: false,
               drawBorder: false
             },
-            minBarLength: 50
+            minBarLength: 60
           }],
         },
         legend: {
@@ -185,7 +185,7 @@ export default class Stats extends AbstractComponent {
               display: false,
               drawBorder: false
             },
-            minBarLength: 50
+            minBarLength: 60
           }],
         },
         legend: {
@@ -267,7 +267,7 @@ export default class Stats extends AbstractComponent {
               display: false,
               drawBorder: false
             },
-            minBarLength: 50
+            minBarLength: 60
           }],
         },
         legend: {

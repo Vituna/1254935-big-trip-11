@@ -4,7 +4,7 @@ import 'moment-duration-format';
 import {TYPES_OF_EVENT} from "../const.js";
 const OFFERS_COUNT = 3;
 
-export default class Event extends AbstractComponent {
+export default class Point extends AbstractComponent {
   constructor({
     type,
     destination,

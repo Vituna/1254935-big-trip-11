@@ -1,6 +1,7 @@
-import ModelEvent from './models/model-point.js';
-// import ModelOffers from './models/model-point.js';
-import ModelDestinations from './models/model-destinations.js';
+// import {getRandomString} from './util.js';
+import ModelEvent from '../models/model-point.js';
+import ModelOffers from '../models/model-point.js';
+import ModelDestinations from '../models/model-destinations';
 
 export default class API {
   constructor({url, authorization}) {
@@ -12,8 +13,8 @@ export default class API {
     return this._load({
       url: `${this._url}offers`
     })
-    .then((response) => response.json());
-    // .then(ModelOffers.parseOffers);
+    .then((response) => response.json())
+    .then(ModelOffers.parseOffers);
   }
   getDestinations() {
     return this._load({
@@ -59,7 +60,6 @@ export default class API {
     .then((response) => response.json())
     .then(ModelEvent.parseEvent);
   }
-
   syncEvents(events) {
     return this._load({
       url: `${this._url}points/sync`,
