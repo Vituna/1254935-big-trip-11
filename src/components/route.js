@@ -3,7 +3,7 @@ const SHOW_CITIES_COUNT = 3;
 import moment from 'moment';
 
 
-export default class TripInfo extends AbstractComponent {
+export default class Route extends AbstractComponent {
   constructor(eventsData, price) {
     super();
     this._price = price;

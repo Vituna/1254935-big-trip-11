@@ -7,7 +7,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
-export default class EventEdit extends AbstractSmartComponent {
+export default class Create extends AbstractSmartComponent {
   constructor({
     type,
     destination,
@@ -89,7 +89,7 @@ export default class EventEdit extends AbstractSmartComponent {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${this._type.title}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1"  name="event-destination" value="${this._destination.city ? this._destination.city : ``}" list="destination-list-1"  required>
+        <input class="event__input  event__input--destination" id="event-destination-1"  name="event-destination" value="${this._destination.city ? this._destination.city : ``}" list="destination-list-1"  required readonly>
         <datalist id="destination-list-1">
           ${allDestinations ? allDestinations.map((destination) => `<option value="${destination.city}"></option>`).join(``) : ``}
         </datalist>
@@ -244,7 +244,7 @@ export default class EventEdit extends AbstractSmartComponent {
   recoveryListeners() {
     this._subscribeOnCityChange();
     this._subscribeOnTypeChange();
-    this._applyFlatpickr();
+    // this._applyFlatpickr();
   }
 
   _getFirstDescription(newType) {

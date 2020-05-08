@@ -1,5 +1,5 @@
 import Menu from './components/site-menu.js';
-import Filters from './components/filter.js';
+import Filters from './components/filters.js';
 import TripInfo from './components/route.js';
 import Stats from './components/stats.js';
 import TripController from './controllers/trip-controller.js';

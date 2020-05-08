@@ -1,17 +1,13 @@
 import ModelEvent from '../models/model-point.js';
 import {objectToArray} from '../util.js';
 
-const isOnline = () => {
-  return window.navigator.onLine;
-};
-
 export default class Provider {
   constructor(api, store) {
     this._api = api;
     this._store = store;
   }
   getEvents() {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.getEvents()
         .then((events) => {
           events.map((it) => {
@@ -26,7 +22,7 @@ export default class Provider {
     }
   }
   createEvent(newEvent) {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.createEvent(newEvent)
         .then((event) => {
           this._store.setItem(event.id, ModelEvent.toRAW(event));
@@ -39,7 +35,7 @@ export default class Provider {
 
   }
   deleteEvent(id) {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.deleteEvent(id)
         .then(() => {
           this._store.removeItem(id);
@@ -51,7 +47,7 @@ export default class Provider {
   }
 
   changeEvent(id, data) {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.changeEvent(id, data)
         .then((event) => {
           this._store.setItem(event.id, ModelEvent.toRAW(event));
@@ -63,7 +59,7 @@ export default class Provider {
     }
   }
   getOffers() {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.getOffers()
         .then((offers) => {
           this._store.setOffers(offers);
@@ -75,7 +71,7 @@ export default class Provider {
     }
   }
   getDestinations() {
-    if (isOnline()) {
+    if (this._isOnline()) {
       return this._api.getDestinations()
         .then((destinations) => {
           this._store.setDestinations(destinations);
@@ -89,7 +85,9 @@ export default class Provider {
   syncEvents() {
     return this._api.syncEvents(objectToArray(this._store.getAll()));
   }
-
+  _isOnline() {
+    return window.navigator.onLine;
+  }
   _generateId() {
     return String(Date.now() + Math.random());
   }
