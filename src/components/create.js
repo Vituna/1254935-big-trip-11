@@ -7,7 +7,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
-export default class EventEdit extends AbstractSmartComponent {
+export default class Create extends AbstractSmartComponent {
   constructor({
     type,
     destination,
@@ -34,6 +34,7 @@ export default class EventEdit extends AbstractSmartComponent {
     this._subscribeOnCityChange();
     this.addFlatpickr();
   }
+
   addFlatpickr() {
     const start = flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
       dateFormat: `d.m.y H:i`,
@@ -206,6 +207,7 @@ export default class EventEdit extends AbstractSmartComponent {
       } else {
         evt.target.setCustomValidity(`Please select a valid value.`);
       }
+      this.rerender();
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
   }
@@ -243,7 +245,6 @@ export default class EventEdit extends AbstractSmartComponent {
   recoveryListeners() {
     this._subscribeOnCityChange();
     this._subscribeOnTypeChange();
-    this._applyFlatpickr();
   }
 
   _getFirstDescription(newType) {

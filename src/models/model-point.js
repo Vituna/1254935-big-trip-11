@@ -1,5 +1,5 @@
 
-export default class ModelEvent {
+export default class ModelPoint {
   constructor(data) {
     this.id = data[`id`] || ``;
     this.type = data[`type`];
@@ -20,10 +20,10 @@ export default class ModelEvent {
     this.isFavorite = data[`is_favorite`];
   }
   static parseEvent(data) {
-    return new ModelEvent(data);
+    return new ModelPoint(data);
   }
   static parseEvents(data) {
-    return data.map(ModelEvent.parseEvent);
+    return data.map(ModelPoint.parseEvent);
   }
 
   static toRAW(data) {
@@ -41,7 +41,7 @@ export default class ModelEvent {
           };
         }),
       },
-      'base_price': data.price,
+      'base_price': Number(data.price),
       'date_from': data.start,
       'date_to': data.end,
       'offers': data.offers,
