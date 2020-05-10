@@ -1,6 +1,6 @@
 import Menu from './components/site-menu.js';
 import Filters from './components/filters.js';
-import TripInfo from './components/route.js';
+import Route from './components/route.js';
 import Stats from './components/stats.js';
 import TripController from './controllers/trip-controller.js';
 import LoadingMessage from './components/loading-message.js';
@@ -10,10 +10,6 @@ import Provider from './api/provider.js';
 import {filtersNames, ActionType, getPrice} from "./const.js";
 import {render, remove, RenderPosition} from "./util.js";
 
-const tripControls = document.querySelector(`.trip-controls`);
-const tripEvents = document.querySelector(`.trip-events`);
-const tripInfo = document.querySelector(`.trip-main`);
-const addButton = document.querySelector(`.trip-main__event-add-btn`);
 const AUTORIZATION = `Basic dZZlckBwYXNyy29yZAo=`;
 const URL = `https://11.ecmascript.pages.academy/big-trip/`;
 const Keys = {
@@ -21,6 +17,11 @@ const Keys = {
   OFFERS: `offers-store-key`,
   DESTINATIONS: `destinations-store-key`,
 };
+
+const tripControls = document.querySelector(`.trip-controls`);
+const tripEvents = document.querySelector(`.trip-events`);
+const tripInfo = document.querySelector(`.trip-main`);
+const addButton = document.querySelector(`.trip-main__event-add-btn`);
 
 const api = new API({
   url: URL,
@@ -77,7 +78,7 @@ const onDataChange = (actionType, data, onError, element) => {
 
 const renderInfo = (events) => {
   let price = getPrice(events);
-  const info = new TripInfo(events, price);
+  const info = new Route(events, price);
   if (events.length !== 0) {
     render(tripInfo, info.getElement(), RenderPosition.PREPEND);
   }
@@ -150,6 +151,7 @@ const onMenuClick = (evt) => {
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
 });
+
 window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
   provider.syncEvents()

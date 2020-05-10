@@ -1,6 +1,4 @@
-// import {getRandomString} from './util.js';
-import ModelEvent from '../models/model-point.js';
-import ModelOffers from '../models/model-point.js';
+import ModelPoint from '../models/model-point.js';
 import ModelDestinations from '../models/model-destinations';
 
 export default class API {
@@ -13,9 +11,9 @@ export default class API {
     return this._load({
       url: `${this._url}offers`
     })
-    .then((response) => response.json())
-    .then(ModelOffers.parseOffers);
+    .then((response) => response.json());
   }
+
   getDestinations() {
     return this._load({
       url: `${this._url}destinations`
@@ -23,16 +21,17 @@ export default class API {
     .then((response) => response.json())
     .then(ModelDestinations.parseDestinations);
   }
+
   getEvents() {
     return this._load({
       url: `${this._url}points`
     })
     .then((response) => response.json())
-    .then(ModelEvent.parseEvents);
-
+    .then(ModelPoint.parseEvents);
   }
+
   createEvent(event) {
-    const dataRAW = ModelEvent.toRAW(event);
+    const dataRAW = ModelPoint.toRAW(event);
     return this._load({
       url: `${this._url}points`,
       method: `POST`,
@@ -40,16 +39,18 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then((response) => response.json())
-    .then(ModelEvent.parseEvent);
+    .then(ModelPoint.parseEvent);
   }
+
   deleteEvent(id) {
     return this._load({
       url: `${this._url}points/${id}`,
       method: `DELETE`
     });
   }
+
   changeEvent(id, data) {
-    const dataRAW = ModelEvent.toRAW(data);
+    const dataRAW = ModelPoint.toRAW(data);
 
     return this._load({
       url: `${this._url}points/${id}`,
@@ -58,8 +59,9 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
     .then((response) => response.json())
-    .then(ModelEvent.parseEvent);
+    .then(ModelPoint.parseEvent);
   }
+
   syncEvents(events) {
     return this._load({
       url: `${this._url}points/sync`,

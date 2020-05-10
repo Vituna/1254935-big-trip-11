@@ -34,6 +34,7 @@ export default class Create extends AbstractSmartComponent {
     this._subscribeOnCityChange();
     this.addFlatpickr();
   }
+
   addFlatpickr() {
     const start = flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
       dateFormat: `d.m.y H:i`,
@@ -89,7 +90,7 @@ export default class Create extends AbstractSmartComponent {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${this._type.title}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1"  name="event-destination" value="${this._destination.city ? this._destination.city : ``}" list="destination-list-1"  required readonly>
+        <input class="event__input  event__input--destination" id="event-destination-1"  name="event-destination" value="${this._destination.city ? this._destination.city : ``}" list="destination-list-1"  required>
         <datalist id="destination-list-1">
           ${allDestinations ? allDestinations.map((destination) => `<option value="${destination.city}"></option>`).join(``) : ``}
         </datalist>
@@ -244,7 +245,6 @@ export default class Create extends AbstractSmartComponent {
   recoveryListeners() {
     this._subscribeOnCityChange();
     this._subscribeOnTypeChange();
-    // this._applyFlatpickr();
   }
 
   _getFirstDescription(newType) {
