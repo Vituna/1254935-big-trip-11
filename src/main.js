@@ -7,8 +7,8 @@ import LoadingMessage from './components/loading-message.js';
 import API from './api/api.js';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
-import {filtersNames, ActionType, getPrice} from "./const.js";
-import {render, remove, RenderPosition} from "./util.js";
+import {filtersNames, ActionType} from "./const.js";
+import {render, remove, RenderPosition, getPrice} from "./util.js";
 
 const AUTORIZATION = `Basic dZZlckBwYXNyy29yZAo=`;
 const URL = `https://11.ecmascript.pages.academy/big-trip/`;
@@ -118,14 +118,16 @@ export {
   allDestinations
 };
 
+const menuA = menu.getElement().querySelectorAll(`a`);
+
 const onAddEventButtonClick = () => {
   addButton.disabled = true;
   tripController.createEvent(addButton);
   tripController.onChangeView();
   stats.hide();
   tripController.show();
-  Array.from(menu.getElement().querySelectorAll(`a`)).find((a) => a.text === `Table`).classList.add(`trip-tabs__btn--active`);
-  Array.from(menu.getElement().querySelectorAll(`a`)).find((a) => a.text === `Stats`).classList.remove(`trip-tabs__btn--active`);
+  Array.from(menuA).find((a) => a.text === `Table`).classList.add(`trip-tabs__btn--active`);
+  Array.from(menuA).find((a) => a.text === `Stats`).classList.remove(`trip-tabs__btn--active`);
 };
 
 const onMenuClick = (evt) => {

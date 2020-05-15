@@ -26,6 +26,19 @@ export const remove = (element) => {
   }
 };
 
+export const getPrice = (eventsData) => {
+  let price = 0;
+  if (eventsData.length !== 0) {
+    price = eventsData.map((event) => {
+      const offersPrice = event.offers.filter((it) => it.accepted).reduce((a, b) => {
+        return a + b.price;
+      }, 0);
+      return event.price + offersPrice;
+    }).reduce((a, b) => a + b);
+  }
+  return price;
+};
+
 export const getEventsInDays = (eventsData) => {
   return eventsData.reduce((acc, event) => {
     const date = new Date(event.start).toDateString();
@@ -41,3 +54,5 @@ export const getEventsInDays = (eventsData) => {
 export const objectToArray = (object) => {
   return Object.keys(object).map((id) => object[id]);
 };
+
+

@@ -36,8 +36,18 @@ export default class Stats extends AbstractComponent {
     this._moneyChart.destroy();
     this._transportChart.destroy();
     this._timeSpendChart.destroy();
+    this._moneyChart = null;
+    this._transportChart = null;
+    this._timeChart = null;
     this.getStatistics(eventsData);
   }
+
+  _resetCharts() {
+    this._resetChart(this._moneyChart);
+    this._resetChart(this._transportChart);
+    this._resetChart(this._timeChart);
+  }
+
 
   getStatistics(eventsData) {
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
@@ -52,6 +62,7 @@ export default class Stats extends AbstractComponent {
     Chart.defaults.global.defaultFontSize = 15;
 
     this._moneyChart = new Chart(moneyCtx, {
+
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {

@@ -7,6 +7,7 @@ import PointDayAll from '../components/point-day-all.js';
 import {remove, getEventsInDays} from '../util.js';
 import {TYPES_OF_EVENT, ModeType} from '../const.js';
 
+
 export default class TripController {
   constructor(container, onDataChange) {
     this._container = container;
@@ -19,6 +20,7 @@ export default class TripController {
     this._subscriptions = [];
     this.onChangeView = this.onChangeView.bind(this);
   }
+
 
   init(eventsData) {
     if (eventsData && eventsData.length === 0) {
@@ -58,7 +60,6 @@ export default class TripController {
   }
 
   _renderSortEvents(data) {
-
     if (!this._daysList.getElement().querySelector(`ul`)) {
       this._renderDaysList(data);
       return;
@@ -68,27 +69,31 @@ export default class TripController {
     const eventsListSort = this._sortOrFilterEventsContainer.getElement().querySelector(`.trip-events__list`);
     eventsListSort.innerHTML = ``;
     const currentSort = Array.from(this._sort.getElement().querySelectorAll(`input`)).find((it) => it.checked).value;
+    const textDay = this._sort.getElement().querySelector(`.trip-sort__item--day`);
 
     switch (currentSort) {
       case `sort-event`:
         this._renderDaysList(data);
+        textDay.textContent = `Day`;
         break;
       case `sort-time`:
         const eventsByTime = data.slice().sort((a, b) => (a.start - a.end) - (b.start - b.end));
         this._renderEvents(eventsByTime, eventsListSort);
+        textDay.textContent = ` `;
         break;
       case `sort-price`:
         const eventsByPrice = data.slice().sort((a, b) => b.price - a.price);
         this._renderEvents(eventsByPrice, eventsListSort);
+        textDay.textContent = ` `;
         break;
     }
   }
 
   createEvent(addButton) {
     const defaultEvent = {
-      type: TYPES_OF_EVENT[9].id,
+      type: TYPES_OF_EVENT[0].id,
       destination: ``,
-      price: 0,
+      price: 100,
       start: new Date(),
       end: new Date(),
       offers: [],
@@ -97,10 +102,11 @@ export default class TripController {
 
     if (this._message.getElement()) {
       remove(this._message.getElement());
+
       this._sort.getElement().classList.remove(`visually-hidden`);
     }
     this._addButton = addButton;
-    const eventsListContainer = this._container.querySelector(`.trip-sort`);
+    const eventsListContainer = this._container.querySelector(`.trip-days`);
     this._creatingEvent = new PointController(defaultEvent, ModeType.ADD, eventsListContainer, (...args) => {
       this._addButton.disabled = false;
       this._onDataChange(...args);

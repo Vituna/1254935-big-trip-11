@@ -1,6 +1,7 @@
 import Event from '../components/point.js';
 import Create from '../components/create.js';
 import moment from 'moment';
+
 import {render, remove, RenderPosition} from "../util.js";
 import {ActionType, ModeType} from "../const.js";
 import {allDestinations} from '../main.js';
@@ -12,25 +13,40 @@ export default class PointController {
     this._event = new Event(eventData);
     this._eventEdit = new Create(eventData);
     this._onDataChange = onDataChange;
+
     this._onChangeView = onChangeView;
     this._bind = this._bind.bind(this);
-    this.create(mode);
+    this._create(mode);
   }
 
-  create(mode) {
+  _setRollunbButtonClickHandler(handler) {
+    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, handler);
+  }
+
+  _setResetButtonClickHandler(handler) {
+    this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, handler);
+  }
+
+  _setEditHandler(handler) {
+    this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, handler);
+  }
+
+
+  _create(mode) {
     this._resetButton = this._eventEdit.getElement().querySelector(`.event__reset-btn `);
     this._submitButton = this._eventEdit.getElement().querySelector(`.event__save-btn `);
     this._formElements = Array.from(this._eventEdit.getElement().querySelectorAll(`input, button`));
     this._form = this._eventEdit.getElement().querySelector(`form`);
+    // const flet = this._eventEdit.getElement().querySelectorAll(`.flatpickr-calendar`);
 
     let currentView = this._event.getElement();
-    let position = RenderPosition.APPEND;
+    let position = RenderPosition.PREPEND;
     if (mode === ModeType.ADD) {
       currentView = this._eventEdit.getElement().querySelector(`form`);
-      position = RenderPosition.APPEND;
-      currentView.classList.add(`trip-events__item`);
-      currentView.querySelector(`.event__rollup-btn`).remove();
-      currentView.querySelector(`.event__reset-btn`).textContent = `Cancel`;
+      position = RenderPosition.PREPEND;
+      this._form.classList.add(`trip-events__item`);
+      this._form.querySelector(`.event__rollup-btn`).remove();
+      this._form.querySelector(`.event__reset-btn`).textContent = `Cancel`;
     }
 
     const onEscKeydown = (evt) => {
@@ -38,24 +54,23 @@ export default class PointController {
         evt.preventDefault();
         this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
         document.removeEventListener(`keydown`, onEscKeydown);
-
       }
     };
 
-    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    this._setRollunbButtonClickHandler(() => {
       this._onChangeView();
       this._container.replaceChild(this._eventEdit.getElement(), this._event.getElement());
       document.addEventListener(`keydown`, onEscKeydown);
+      if (mode === ModeType.DEFAULT) {
+        this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+          this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+          this._eventEdit.getElement().querySelector(`form`).reset();
+          document.removeEventListener(`keydown`, onEscKeydown);
+        });
+      }
     });
-    if (mode === ModeType.DEFAULT) {
-      this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
-        this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
-        this._eventEdit.getElement().querySelector(`form`).reset();
-        document.removeEventListener(`keydown`, onEscKeydown);
-      });
-    }
 
-    this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, (evt) => {
+    this._setResetButtonClickHandler((evt) => {
       evt.preventDefault();
       if (mode === ModeType.ADD) {
         this._onDataChange();
@@ -67,7 +82,7 @@ export default class PointController {
       document.removeEventListener(`keydown`, onEscKeydown);
     });
 
-    this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, (evt) => {
+    this._setEditHandler((evt) => {
       evt.preventDefault();
       const formData = new FormData(evt.target);
       this._eventData.id = this._eventData.id ? this._eventData.id : ``;

@@ -6,6 +6,7 @@ import moment from 'moment';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
+// import {remove} from "../util.js";
 
 export default class Create extends AbstractSmartComponent {
   constructor({
@@ -24,42 +25,24 @@ export default class Create extends AbstractSmartComponent {
     };
     this._destination = destination;
     this._price = price;
-
     this._start = new Date(start);
     this._end = new Date(end);
     this._offers = offers;
-
     this._isFavorite = isFavorite;
+    this._flatpickrStartDate = null;
+    this._flatpickrEndDate = null;
+    this._addFlatpickr();
     this._subscribeOnTypeChange();
     this._subscribeOnCityChange();
-    this.addFlatpickr();
+
+    // this._addFlatpickr();
+
   }
 
-  addFlatpickr() {
-    const start = flatpickr((this.getElement().querySelector(`#event-start-time-1`)), {
-      dateFormat: `d.m.y H:i`,
-      allowInput: true,
-      enableTime: true,
-      defaultDate: this._start,
-      onChange(selectedDates) {
-        end.set(`minDate`, selectedDates[0]);
-      }
-    });
-
-    const end = flatpickr((this.getElement().querySelector(`#event-end-time-1`)), {
-      dateFormat: `d.m.y H:i`,
-      allowInput: true,
-      enableTime: true,
-      defaultDate: this._end,
-      onChange(selectedDates) {
-        start.set(`maxDate`, selectedDates[0]);
-      },
-    });
-  }
 
   getTemplate() {
     return `<li class="trip-events__item">
-    <form class="event  event--edit"  method="post" action="https://echo.htmlacademy.ru" enctype="multipart/form-data" autocomplete="off">
+    <form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -165,23 +148,13 @@ export default class Create extends AbstractSmartComponent {
   }
 
   _subscribeOnTypeChange() {
-    const eventDetailsContainer = this.getElement().querySelector(`.event__details`);
-    const label = this.getElement().querySelector(`.event__type-output`);
-    const img = this.getElement().querySelector(`.event__type-icon`);
-    let offersContainer = this.getElement().querySelector(`.event__available-offers`);
-
-    const onTypeChange = (evt) => {
+    const element = this.getElement();
+    element.querySelector(`.event__type-list`).addEventListener(`change`, (evt) => {
       const newType = TYPES_OF_EVENT.find((it) => it.id === evt.target.value);
-      label.textContent = newType.title;
-      img.src = `img/icons/${newType.id}.png`;
-      const offers = allOffers.find((it) => it.type === newType.id).offers;
-      if (!offersContainer) {
-        eventDetailsContainer.insertAdjacentHTML(`afterbegin`, this._getOffersContainer());
-        offersContainer = eventDetailsContainer.querySelector(`.event__available-offers`);
-      }
-      offersContainer.innerHTML = this._getOffers(offers);
-    };
-    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
+      this._offers = allOffers.find((it) => it.type === newType.id).offers;
+      this._type = newType;
+      this.rerender();
+    });
   }
 
   _getOffersContainer() {
@@ -194,19 +167,12 @@ export default class Create extends AbstractSmartComponent {
 
   _subscribeOnCityChange() {
     const eventDetailsContainer = this.getElement().querySelector(`.event__details`);
-    const options = Array.from(this.getElement().querySelector(`#destination-list-1`).querySelectorAll(`option`));
-
     const onCityChange = (evt) => {
-      if (!evt.target.value) {
-        return;
-      }
-      if (options.find((it) => it.value === evt.target.value)) {
-        const newDestination = allDestinations.find((it) => it.city === evt.target.value);
-        this._getDescription(eventDetailsContainer, newDestination);
-        evt.target.setCustomValidity(``);
-      } else {
-        evt.target.setCustomValidity(`Please select a valid value.`);
-      }
+
+      const newDestination = allDestinations.find((it) => it.city === evt.target.value);
+      this._getDescription(eventDetailsContainer, newDestination);
+      evt.target.setCustomValidity(``);
+
       this.rerender();
     };
     this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
@@ -238,13 +204,28 @@ export default class Create extends AbstractSmartComponent {
     }
   }
 
+
+  removeElement() {
+    if (this._flatpickrStartDate || this._flatpickrEndDate) {
+      this._flatpickrStartDate.destroy();
+      this._flatpickrEndDate.destroy();
+      this._flatpickrStartDate = null;
+      this._flatpickrEndDate = null;
+    }
+
+    super.removeElement();
+  }
+
+
   rerender() {
     super.rerender();
+    this._addFlatpickr();
   }
 
   recoveryListeners() {
     this._subscribeOnCityChange();
     this._subscribeOnTypeChange();
+    this._addFlatpickr();
   }
 
   _getFirstDescription(newType) {
@@ -261,6 +242,61 @@ export default class Create extends AbstractSmartComponent {
   }
 
   _getPhotos(destination) {
-    return destination.pictures.map((it) => `<img class="event__photo" src=${it.url} alt="${it.alt}">`).join(``);
+    return (destination.pictures.map((it) => `<img class="event__photo" src=${it.url} alt="${it.alt}">`)).join(``);
   }
+
+  /* _addFlatpickr() {
+    /* end = null;
+    end.destroy();
+    start = null;
+    start.destroy();
+
+    const element = this.getElement();
+    const start = flatpickr(element.querySelector(`#event-start-time-1`), {
+      dateFormat: `d.m.y H:i`,
+      allowInput: true,
+      enableTime: true,
+      defaultDate: this._start,
+      onChange(selectedDates) {
+        end.set(`minDate`, selectedDates[0]);
+      }
+    });
+
+    const end = flatpickr(element.querySelector(`#event-end-time-1`), {
+      dateFormat: `d.m.y H:i`,
+      allowInput: true,
+      enableTime: true,
+      defaultDate: this._end,
+      onChange(selectedDates) {
+        start.set(`maxDate`, selectedDates[0]);
+      },
+
+    });
+  }*/
+
+
+  _addFlatpickr() {
+
+    if (this._flatpickrStartDate || this._flatpickrEndDate) {
+      this._flatpickrStartDate.destroy();
+      this._flatpickrEndDate.destroy();
+      this._flatpickrStartDate = null;
+      this._flatpickrEndDate = null;
+    }
+
+
+    const element = this.getElement();
+
+    const options = {
+      dateFormat: `d.m.y H:i`,
+      allowInput: true,
+      enableTime: true,
+      defaultDate: this._end,
+    };
+
+    this._flatpickrStartDate = flatpickr(element.querySelector(`#event-start-time-1`), options, {defaultDate: this._start});
+
+    this._flatpickrEndDate = flatpickr(element.querySelector(`#event-end-time-1`), options, {defaultDate: this._end});
+  }
+
 }
