@@ -10,7 +10,7 @@ import Provider from './api/provider.js';
 import {filtersNames, ActionType} from "./const.js";
 import {render, remove, RenderPosition, getPrice} from "./util.js";
 
-const AUTORIZATION = `Basic dZZlckBwYXNyy29yZAo=`;
+const AUTORIZATION = `Basic dZZlckBwYXNuy29yZAo=`;
 const URL = `https://11.ecmascript.pages.academy/big-trip/`;
 const Keys = {
   EVENTS: `events-store-key`,

@@ -55,6 +55,7 @@ export const ActionType = {
 export const ModeType = {
   ADD: `add`,
   DEFAULT: `default`,
+  EDIT: `edit`,
 };
 
 

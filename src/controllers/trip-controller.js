@@ -7,7 +7,6 @@ import PointDayAll from '../components/point-day-all.js';
 import {remove, getEventsInDays} from '../util.js';
 import {TYPES_OF_EVENT, ModeType} from '../const.js';
 
-
 export default class TripController {
   constructor(container, onDataChange) {
     this._container = container;
@@ -20,7 +19,6 @@ export default class TripController {
     this._subscriptions = [];
     this.onChangeView = this.onChangeView.bind(this);
   }
-
 
   init(eventsData) {
     if (eventsData && eventsData.length === 0) {
@@ -60,6 +58,7 @@ export default class TripController {
   }
 
   _renderSortEvents(data) {
+
     if (!this._daysList.getElement().querySelector(`ul`)) {
       this._renderDaysList(data);
       return;
@@ -91,9 +90,9 @@ export default class TripController {
 
   createEvent(addButton) {
     const defaultEvent = {
-      type: TYPES_OF_EVENT[0].id,
+      type: TYPES_OF_EVENT[9].id,
       destination: ``,
-      price: 100,
+      price: 0,
       start: new Date(),
       end: new Date(),
       offers: [],
@@ -102,15 +101,28 @@ export default class TripController {
 
     if (this._message.getElement()) {
       remove(this._message.getElement());
-
       this._sort.getElement().classList.remove(`visually-hidden`);
     }
     this._addButton = addButton;
-    const eventsListContainer = this._container.querySelector(`.trip-days`);
+    const eventsListContainer = this._container.querySelector(`.trip-sort`);
     this._creatingEvent = new PointController(defaultEvent, ModeType.ADD, eventsListContainer, (...args) => {
       this._addButton.disabled = false;
       this._onDataChange(...args);
     }, this.onChangeView);
+  }
+
+  onChangeView() {
+    this._subscriptions.forEach((subscription) => subscription());
+  }
+
+  hide() {
+    this._daysList.getElement().classList.add(`visually-hidden`);
+    this._sort.getElement().classList.add(`visually-hidden`);
+  }
+
+  show() {
+    this._daysList.getElement().classList.remove(`visually-hidden`);
+    this._sort.getElement().classList.remove(`visually-hidden`);
   }
 
   _renderMessage() {
@@ -152,17 +164,4 @@ export default class TripController {
     this._subscriptions.push(eventController.setDefaultView.bind(eventController));
   }
 
-  onChangeView() {
-    this._subscriptions.forEach((subscription) => subscription());
-  }
-
-  hide() {
-    this._daysList.getElement().classList.add(`visually-hidden`);
-    this._sort.getElement().classList.add(`visually-hidden`);
-  }
-
-  show() {
-    this._daysList.getElement().classList.remove(`visually-hidden`);
-    this._sort.getElement().classList.remove(`visually-hidden`);
-  }
 }

@@ -1,8 +1,10 @@
 import Event from '../components/point.js';
 import Create from '../components/create.js';
 import moment from 'moment';
-
-import {render, remove, RenderPosition} from "../util.js";
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
+import {render, remove, RenderPosition, replace} from "../util.js";
 import {ActionType, ModeType} from "../const.js";
 import {allDestinations} from '../main.js';
 
@@ -13,17 +15,16 @@ export default class PointController {
     this._event = new Event(eventData);
     this._eventEdit = new Create(eventData);
     this._onDataChange = onDataChange;
-
     this._onChangeView = onChangeView;
     this._bind = this._bind.bind(this);
     this._create(mode);
   }
 
-  _setRollunbButtonClickHandler(handler) {
-    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, handler);
+  _setRollunbButtonClickHandler(hendler) {
+    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, hendler);
   }
 
-  _setResetButtonClickHandler(handler) {
+  _setResetNewButtonClickHandler(handler) {
     this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, handler);
   }
 
@@ -31,46 +32,68 @@ export default class PointController {
     this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, handler);
   }
 
+  reRender() {
+    super.rerender();
+    this.addFlatpickr();
+  }
+
+  setDefaultView() {
+    if (this._container.contains(this._eventEdit.getElement())) {
+      this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+    }
+  }
+
+  onError(type) {
+    setTimeout(() => {
+      this._shake();
+      this._unbind(type);
+    }, 2000
+    );
+  }
 
   _create(mode) {
     this._resetButton = this._eventEdit.getElement().querySelector(`.event__reset-btn `);
     this._submitButton = this._eventEdit.getElement().querySelector(`.event__save-btn `);
     this._formElements = Array.from(this._eventEdit.getElement().querySelectorAll(`input, button`));
     this._form = this._eventEdit.getElement().querySelector(`form`);
-    // const flet = this._eventEdit.getElement().querySelectorAll(`.flatpickr-calendar`);
 
     let currentView = this._event.getElement();
-    let position = RenderPosition.PREPEND;
+    let position = RenderPosition.APPEND;
     if (mode === ModeType.ADD) {
+      this._addFlatpickr();
       currentView = this._eventEdit.getElement().querySelector(`form`);
-      position = RenderPosition.PREPEND;
-      this._form.classList.add(`trip-events__item`);
-      this._form.querySelector(`.event__rollup-btn`).remove();
-      this._form.querySelector(`.event__reset-btn`).textContent = `Cancel`;
+      position = RenderPosition.APPEND;
+      currentView.classList.add(`trip-events__item`);
+      currentView.querySelector(`.event__rollup-btn`).remove();
+      currentView.querySelector(`.event__reset-btn`).textContent = `Cancel`;
+
     }
 
     const onEscKeydown = (evt) => {
       if (evt.key === `Esc` || evt.key === `Escape`) {
         evt.preventDefault();
-        this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+        replace(this._event, this._eventEdit);
         document.removeEventListener(`keydown`, onEscKeydown);
+        this._eventEdit.removeElement();
       }
     };
 
     this._setRollunbButtonClickHandler(() => {
       this._onChangeView();
-      this._container.replaceChild(this._eventEdit.getElement(), this._event.getElement());
+      this._addFlatpickr();
+      replace(this._eventEdit, this._event);
       document.addEventListener(`keydown`, onEscKeydown);
       if (mode === ModeType.DEFAULT) {
         this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
-          this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+          replace(this._event, this._eventEdit);
+          this._eventEdit.removeElement();
           this._eventEdit.getElement().querySelector(`form`).reset();
           document.removeEventListener(`keydown`, onEscKeydown);
         });
       }
     });
 
-    this._setResetButtonClickHandler((evt) => {
+    this._setResetNewButtonClickHandler((evt) => {
       evt.preventDefault();
       if (mode === ModeType.ADD) {
         this._onDataChange();
@@ -112,10 +135,26 @@ export default class PointController {
     render(this._container, currentView, position);
   }
 
-  setDefaultView() {
-    if (this._container.contains(this._eventEdit.getElement())) {
-      this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+  _addFlatpickr() {
+
+    if (this._flatpickrStartDate || this._flatpickrEndDate) {
+      this._flatpickrStartDate.destroy();
+      this._flatpickrEndDate.destroy();
+      this._flatpickrStartDate = null;
+      this._flatpickrEndDate = null;
     }
+
+    const element = this._eventEdit.getElement();
+
+    const options = {
+      dateFormat: `d.m.y H:i`,
+      allowInput: true,
+      enableTime: true,
+      defaultDate: this._end,
+    };
+
+    this._flatpickrStartDate = flatpickr(element.querySelector(`#event-start-time-1`), options, {defaultDate: this._start});
+    this._flatpickrEndDate = flatpickr(element.querySelector(`#event-end-time-1`), options, {defaultDate: this._end});
   }
 
   _getDisabledFormElements() {
@@ -140,14 +179,6 @@ export default class PointController {
         this._submitButton.textContent = `Saving..`;
         break;
     }
-  }
-
-  onError(type) {
-    setTimeout(() => {
-      this._shake();
-      this._unbind(type);
-    }, 2000
-    );
   }
 
   _shake() {
