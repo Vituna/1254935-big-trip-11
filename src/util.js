@@ -66,21 +66,3 @@ export const getEventsInDays = (eventsData) => {
 export const objectToArray = (object) => {
   return Object.keys(object).map((id) => object[id]);
 };
-// const textDay = this._sort.getElement().querySelector(`.trip-sort__item--day`);
-
-
-/* switch (currentSort) {
-  case `sort-event`:
-    this._renderDaysList(data);
-    textDay.textContent = `Day`;
-    break;
-  case `sort-time`:
-    const eventsByTime = data.slice().sort((a, b) => (a.start - a.end) - (b.start - b.end));
-    this._renderEvents(eventsByTime, eventsListSort);
-    textDay.textContent = ` `;
-    break;
-  case `sort-price`:
-    const eventsByPrice = data.slice().sort((a, b) => b.price - a.price);
-    this._renderEvents(eventsByPrice, eventsListSort);
-    textDay.textContent = ` `;
-    break;*/

@@ -20,8 +20,8 @@ export default class PointController {
     this._create(mode);
   }
 
-  _setRollunbButtonClickHandler(hendler) {
-    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, hendler);
+  _setRollunbButtonClickHandler(handler) {
+    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, handler);
   }
 
   _setResetNewButtonClickHandler(handler) {
@@ -97,10 +97,13 @@ export default class PointController {
       evt.preventDefault();
       if (mode === ModeType.ADD) {
         this._onDataChange();
+        this._eventEdit.removeElement();
+
         remove(currentView);
       } else {
         this._bind(ActionType.DELETE);
         this._onDataChange(ActionType.DELETE, this._eventData, this.onError.bind(this, ActionType.DELETE));
+        this._eventEdit.removeElement();
       }
       document.removeEventListener(`keydown`, onEscKeydown);
     });
@@ -136,7 +139,6 @@ export default class PointController {
   }
 
   _addFlatpickr() {
-
     if (this._flatpickrStartDate || this._flatpickrEndDate) {
       this._flatpickrStartDate.destroy();
       this._flatpickrEndDate.destroy();

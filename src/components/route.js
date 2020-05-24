@@ -13,14 +13,14 @@ export default class Route extends AbstractComponent {
 
   getTemplate() {
     return `<section class="trip-main__trip-info  trip-info">
-    <div class="trip-info__main">
-    <h1 class="trip-info__title">${this._startCity} ${this._middleCity} &mdash; ${this._endCity}</h1>
-    <p class="trip-info__dates">${this._dateStartTrip}&nbsp;&mdash;&nbsp;${this._dateEndTrip}</p>
-    </div>
-    <p class="trip-info__cost">
-    Total: &euro;&nbsp;<span class="trip-info__cost-value">${this._price}</span>
-    </p>
-    </section>`;
+      <div class="trip-info__main">
+        <h1 class="trip-info__title">${this._startCity} ${this._middleCity} &mdash; ${this._endCity}</h1>
+        <p class="trip-info__dates">${this._dateStartTrip}&nbsp;&mdash;&nbsp;${this._dateEndTrip}</p>
+      </div>
+      <p class="trip-info__cost">
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">${this._price}</span>
+      </p>
+      </section>`;
   }
 
   _getDate() {

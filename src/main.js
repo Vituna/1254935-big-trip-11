@@ -118,7 +118,7 @@ export {
   allDestinations
 };
 
-const menuA = menu.getElement().querySelectorAll(`a`);
+const menuLink = menu.getElement().querySelectorAll(`a`);
 
 const onAddEventButtonClick = () => {
   addButton.disabled = true;
@@ -126,8 +126,8 @@ const onAddEventButtonClick = () => {
   tripController.onChangeView();
   stats.hide();
   tripController.show();
-  Array.from(menuA).find((a) => a.text === `Table`).classList.add(`trip-tabs__btn--active`);
-  Array.from(menuA).find((a) => a.text === `Stats`).classList.remove(`trip-tabs__btn--active`);
+  Array.from(menuLink).find((a) => a.text === `Table`).classList.add(`trip-tabs__btn--active`);
+  Array.from(menuLink).find((a) => a.text === `Stats`).classList.remove(`trip-tabs__btn--active`);
 };
 
 const onMenuClick = (evt) => {
