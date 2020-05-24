@@ -98,12 +98,10 @@ export default class PointController {
       if (mode === ModeType.ADD) {
         this._onDataChange();
         this._eventEdit.removeElement();
-
         remove(currentView);
       } else {
         this._bind(ActionType.DELETE);
         this._onDataChange(ActionType.DELETE, this._eventData, this.onError.bind(this, ActionType.DELETE));
-        this._eventEdit.removeElement();
       }
       document.removeEventListener(`keydown`, onEscKeydown);
     });
