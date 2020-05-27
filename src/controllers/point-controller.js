@@ -1,205 +1,182 @@
-import Event from '../components/point.js';
-import Create from '../components/create.js';
-import moment from 'moment';
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
-import 'flatpickr/dist/themes/light.css';
-import {render, remove, RenderPosition, replace} from "../util.js";
-import {ActionType, ModeType} from "../const.js";
-import {allDestinations} from '../main.js';
+import EventComponent from "../components/point";
+import EventEditComponent from "../components/create";
+import PointModel from "../models/point";
 
-export default class PointController {
-  constructor(eventData, mode, container, onDataChange, onChangeView) {
+import {render, replace} from "../utils/render";
+import {Place, Mode, emptyPoint, ApiOption, DuringData} from "../components/consts";
+import {encode} from "he";
+import {getDestinationForCity, getOffersForType, isEscKey} from "../utils/common";
+
+const parseFormData = (formData, id, destinations, offers) => {
+  const type = formData.get(`event-type`).toLowerCase();
+  const dateStart = formData.get(`event-start-time`);
+  const dateEnd = formData.get(`event-end-time`);
+  const city = encode(formData.get(`event-destination`));
+  const destination = getDestinationForCity(city, destinations);
+  const offersData = type ? getOffersForType(type, offers) : null;
+  const pointOffers = formData.getAll(`event-offer-${type}`);
+  const checkedOffers = offersData.filter((offer) => pointOffers.includes(offer.title));
+
+  return new PointModel({
+    "id": id,
+    "base_price": parseInt(formData.get(`event-price`), 10),
+    "date_from": dateStart ? new Date(dateStart) : null,
+    "date_to": dateEnd ? new Date(dateEnd) : null,
+    "destination": destination ? destination : {name: city, description: ``, pictures: []},
+    "type": type.toLowerCase(),
+    "offers": checkedOffers ? checkedOffers : [],
+    "is_favorite": !!formData.get(`event-favorite`),
+  });
+};
+
+class PointController {
+  constructor(container, onDataChange, onViewChange, pointsModel) {
     this._container = container;
-    this._eventData = eventData;
-    this._event = new Event(eventData);
-    this._eventEdit = new Create(eventData);
     this._onDataChange = onDataChange;
-    this._onChangeView = onChangeView;
-    this._bind = this._bind.bind(this);
-    this._create(mode);
+    this._onViewChange = onViewChange;
+    this._mode = Mode.DEFAULT;
+    this._pointsModel = pointsModel;
+    this._destinations = pointsModel.getDestinations();
+    this._offers = pointsModel.getOffers();
+
+    this._eventComponent = null;
+    this._eventEditComponent = null;
+
+    this.shake = this.shake.bind(this);
+    this._setTimeout = this._setTimeout.bind(this);
+    this._onEscKeyDown = this._onEscKeyDown.bind(this);
   }
 
-  _setRollunbButtonClickHandler(handler) {
-    this._event.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, handler);
-  }
+  render(event, mode) {
+    const oldEventComponent = this._eventComponent;
+    const oldEventEditComponent = this._eventEditComponent;
+    this._mode = mode;
+    this._eventComponent = new EventComponent(event);
+    this._eventEditComponent = new EventEditComponent(event, mode, this._pointsModel);
 
-  _setResetNewButtonClickHandler(handler) {
-    this._eventEdit.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, handler);
-  }
+    this._addListeners(event);
 
-  _setEditHandler(handler) {
-    this._eventEdit.getElement().querySelector(`.event--edit`).addEventListener(`submit`, handler);
-  }
-
-  reRender() {
-    super.rerender();
-    this.addFlatpickr();
+    switch (mode) {
+      case Mode.DEFAULT:
+        if (oldEventEditComponent && oldEventComponent) {
+          oldEventEditComponent.delleteFlatpickr();
+          replace(this._eventComponent, oldEventComponent);
+          replace(this._eventEditComponent, oldEventEditComponent);
+          this._onReplaceToEvent();
+        } else {
+          render(this._container, this._eventComponent, Place.BEFOREEND);
+        }
+        break;
+      case Mode.ADDING:
+        if (oldEventEditComponent && oldEventComponent) {
+          oldEventEditComponent.destroy();
+          oldEventComponent.destroy();
+        }
+        document.addEventListener(`keydown`, this._onEscKeyDown);
+        render(this._container, this._eventEditComponent, Place.AFTERBEGIN);
+        this._eventEditComponent.applyFlatpickr();
+        break;
+    }
   }
 
   setDefaultView() {
-    if (this._container.contains(this._eventEdit.getElement())) {
-      this._container.replaceChild(this._event.getElement(), this._eventEdit.getElement());
+    if (this._mode !== Mode.DEFAULT) {
+      this._onReplaceToEvent();
     }
   }
 
-  onError(type) {
-    setTimeout(() => {
-      this._shake();
-      this._unbind(type);
-    }, 2000
-    );
+  destroy() {
+    this._eventEditComponent.destroy();
+    this._eventComponent.destroy();
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
-  _create(mode) {
-    this._resetButton = this._eventEdit.getElement().querySelector(`.event__reset-btn `);
-    this._submitButton = this._eventEdit.getElement().querySelector(`.event__save-btn `);
-    this._formElements = Array.from(this._eventEdit.getElement().querySelectorAll(`input, button`));
-    this._form = this._eventEdit.getElement().querySelector(`form`);
+  shake() {
+    this._eventEditComponent.getElement().style.animation = `shake ${ApiOption.SHAKE_ANIMATION_TIMEOUT / ApiOption.DURATION_SHAKE}s`;
+    this._eventComponent.getElement().style.animation = `shake ${ApiOption.SHAKE_ANIMATION_TIMEOUT / ApiOption.DURATION_SHAKE}s`;
+    this._eventEditComponent.getElement().style.border = ApiOption.ERROR_BORDER;
 
-    let currentView = this._event.getElement();
-    let position = RenderPosition.APPEND;
-    if (mode === ModeType.ADD) {
-      this._addFlatpickr();
-      currentView = this._eventEdit.getElement().querySelector(`form`);
-      position = RenderPosition.APPEND;
-      currentView.classList.add(`trip-events__item`);
-      currentView.querySelector(`.event__rollup-btn`).remove();
-      currentView.querySelector(`.event__reset-btn`).textContent = `Cancel`;
+    setTimeout(this._setTimeout, ApiOption.SHAKE_ANIMATION_TIMEOUT);
+  }
 
-    }
+  _setTimeout() {
+    this._eventEditComponent.getElement().style.animation = ``;
+    this._eventComponent.getElement().style.animation = ``;
+    this._eventEditComponent.getElement().style.border = ``;
 
-    const onEscKeydown = (evt) => {
-      if (evt.key === `Esc` || evt.key === `Escape`) {
-        evt.preventDefault();
-        replace(this._event, this._eventEdit);
-        document.removeEventListener(`keydown`, onEscKeydown);
-        this._eventEdit.removeElement();
-      }
-    };
+    this._eventEditComponent.setData({
+      SAVE_BTN: `Save`,
+      DELETE_BTN: `Delete`,
+    });
+  }
 
-    this._setRollunbButtonClickHandler(() => {
-      this._onChangeView();
-      this._addFlatpickr();
-      replace(this._eventEdit, this._event);
-      document.addEventListener(`keydown`, onEscKeydown);
-      if (mode === ModeType.DEFAULT) {
-        this._eventEdit.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
-          replace(this._event, this._eventEdit);
-          this._eventEdit.removeElement();
-          this._eventEdit.getElement().querySelector(`form`).reset();
-          document.removeEventListener(`keydown`, onEscKeydown);
-        });
-      }
+  _addListeners(event) {
+    this._eventComponent.setEditBtnClickHandler(() => {
+      this._onReplaceToEdit();
+      document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
-    this._setResetNewButtonClickHandler((evt) => {
+    this._eventEditComponent.setSaveClickHandler((evt) => {
       evt.preventDefault();
-      if (mode === ModeType.ADD) {
-        this._onDataChange();
-        this._eventEdit.removeElement();
-        remove(currentView);
-      } else {
-        this._bind(ActionType.DELETE);
-        this._onDataChange(ActionType.DELETE, this._eventData, this.onError.bind(this, ActionType.DELETE));
-      }
-      document.removeEventListener(`keydown`, onEscKeydown);
-    });
+      const formData = this._eventEditComponent.getData();
+      const data = parseFormData(formData, event.id, this._destinations, this._offers);
 
-    this._setEditHandler((evt) => {
-      evt.preventDefault();
-      const formData = new FormData(evt.target);
-      this._eventData.id = this._eventData.id ? this._eventData.id : ``;
-      this._eventData.type = formData.get(`event-type`);
-      this._eventData.destination = {
-        city: formData.get(`event-destination`),
-        description: allDestinations.find((it) => it.city === formData.get(`event-destination`)).description,
-        pictures: allDestinations.find((it) => it.city === formData.get(`event-destination`)).pictures,
-      };
-      this._eventData.price = Number(formData.get(`event-price`));
-      this._eventData.start = moment(formData.get(`event-start-time`), `D.MM.YY h:mm`).format();
-      this._eventData.end = moment(formData.get(`event-end-time`), `D.MM.YY h:mm`).format();
-      this._eventData.offers = Array.from(this._eventEdit.getElement().querySelectorAll(`.event__offer-selector`)).map((it) => {
-        return {
-          title: it.querySelector(`.event__offer-title`).textContent,
-          price: Number(it.querySelector(`.event__offer-price`).textContent),
-          accepted: it.querySelector(`.event__offer-checkbox`).checked,
-        };
+      this._eventEditComponent.setData({
+        SAVE_BTN: DuringData.SAVE_BTN,
       });
-      this._eventData.isFavorite = formData.get(`event-favorite`) === `on` ? true : false;
 
-      this._bind(ActionType.CHANGE);
-
-      this._onDataChange(mode === ModeType.ADD ? ActionType.CREATE : ActionType.CHANGE, this._eventData, this.onError.bind(this, ActionType.CHANGE), currentView);
-      document.removeEventListener(`keydown`, onEscKeydown);
+      this._onDataChange(this, event, data);
     });
-    render(this._container, currentView, position);
+
+    this._eventEditComponent.setDeleteButtonClickHandler(() => {
+      this._eventEditComponent.setData({
+        DELETE_BTN: DuringData.DELETE_BTN,
+      });
+
+      this._onDataChange(this, event, null);
+    });
+
+    this._eventEditComponent.setFavoriteButtonHandler(() => {
+      const formData = this._eventEditComponent.getData();
+      const point = parseFormData(formData, event.id, this._destinations, this._offers);
+      const newPoint = PointModel.clone(event);
+
+      newPoint.isFavorite = !point.isFavorite;
+
+      this._onDataChange(this, event, newPoint, true);
+    });
   }
 
-  _addFlatpickr() {
-    if (this._flatpickrStartDate || this._flatpickrEndDate) {
-      this._flatpickrStartDate.destroy();
-      this._flatpickrEndDate.destroy();
-      this._flatpickrStartDate = null;
-      this._flatpickrEndDate = null;
+  _onReplaceToEdit() {
+    this._onViewChange();
+    this._eventEditComponent.applyFlatpickr();
+    replace(this._eventEditComponent, this._eventComponent);
+    this._mode = Mode.EDIT;
+  }
+
+  _onReplaceToEvent() {
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+    this._eventEditComponent.reset();
+
+    if (document.contains(this._eventEditComponent.getElement())) {
+      replace(this._eventComponent, this._eventEditComponent);
+
+      this._eventEditComponent.delleteFlatpickr();
     }
 
-    const element = this._eventEdit.getElement();
-
-    const options = {
-      dateFormat: `d.m.y H:i`,
-      allowInput: true,
-      enableTime: true,
-      defaultDate: this._end,
-    };
-
-    this._flatpickrStartDate = flatpickr(element.querySelector(`#event-start-time-1`), options, {defaultDate: this._start});
-    this._flatpickrEndDate = flatpickr(element.querySelector(`#event-end-time-1`), options, {defaultDate: this._end});
+    this._mode = Mode.DEFAULT;
   }
 
-  _getDisabledFormElements() {
-    this._formElements.forEach((it) => {
-      it.disabled = true;
-    });
-  }
-
-  _getActiveFormElements() {
-    this._formElements.forEach((it) => {
-      it.disabled = false;
-    });
-  }
-
-  _bind(type) {
-    this._getDisabledFormElements();
-    switch (type) {
-      case ActionType.DELETE:
-        this._resetButton.textContent = `Deleting..`;
-        break;
-      case ActionType.CHANGE:
-        this._submitButton.textContent = `Saving..`;
-        break;
-    }
-  }
-
-  _shake() {
-    const ANIMATION_TIMEOUT = 600;
-    this._form.style.border = `2px solid red`;
-    this._form.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
-    setTimeout(() => {
-      this._form.style.animation = ``;
-      this._form.style.border = `none`;
-    }, ANIMATION_TIMEOUT);
-  }
-
-  _unbind(type) {
-    this._getActiveFormElements();
-    switch (type) {
-      case ActionType.DELETE:
-        this._resetButton.textContent = `Delete..`;
-        break;
-      case ActionType.CHANGE:
-        this._submitButton.textContent = `Save`;
-        break;
+  _onEscKeyDown(evt) {
+    if (isEscKey(evt.key)) {
+      if (this._mode === Mode.ADDING) {
+        this._onDataChange(this, emptyPoint, null);
+      }
+      this._onReplaceToEvent();
+      document.removeEventListener(`keydown`, this._onEscKeyDown);
+      this._eventEditComponent.delleteFlatpickr();
     }
   }
 }
+
+export default PointController;

@@ -1,71 +1,105 @@
-import AbstractComponent from "./abstract-component.js";
-import moment from 'moment';
-import 'moment-duration-format';
-import {TYPES_OF_EVENT} from "../const.js";
-const OFFERS_COUNT = 3;
+import AbstractComponent from "./abstract-component";
 
-export default class Point extends AbstractComponent {
-  constructor({
-    type,
-    destination,
-    price,
-    start,
-    end,
-    offers
-  }) {
+import {castTimeFormat, getIsoDate, getDurationMinutes} from "../utils/common";
+import {Format} from "./consts";
+import moment from "moment";
+
+const getDuration = (start, end) => {
+  const duration = getDurationMinutes(start, end);
+
+  const durationHour = Math.floor(duration / Format.IN_HOUR);
+  const durationMinute = (duration) % Format.IN_HOUR;
+  const durationDay = Math.floor(durationHour / Format.IN_DAY);
+  const durationH = durationHour ? castTimeFormat(durationHour % Format.IN_DAY) + `H` : ``;
+  const durationM = durationMinute ? castTimeFormat(durationMinute) + `M` : ``;
+  const durationD = durationDay ? castTimeFormat(durationDay) + `D` : ``;
+
+  return `${durationD} ${durationH} ${durationM}`;
+};
+
+const getDataEvent = (start, end) => {
+  const startTime = moment(start).format(Format.TIME);
+  const endTime = moment(end).format(Format.TIME);
+  const duration = getDuration(start, end);
+
+  return {
+    startTime,
+    endTime,
+    duration
+  };
+};
+
+const createOption = (option) => {
+  const {title, price} = option;
+
+  return (
+    `<li class="event__offer">
+      <span class="event__offer-title">${title}</span>
+      &plus;
+      &euro;&nbsp;<span class="event__offer-price">${price}</span>
+     </li>`
+  );
+};
+
+const getOptions = (offers) => offers.slice(0, 3).map((it) => createOption(it)).join(`\n`);
+
+const createOptions = (offers) => {
+  return (
+    `<h4 class="visually-hidden">Offers:</h4>
+     <ul class="event__selected-offers">
+        ${getOptions(offers)}
+     </ul>`
+  );
+};
+
+
+const createEvent = (event) => {
+  const {basePrice, type, destinations, timeStart, timeEnd, offers} = event;
+  const {startTime, endTime, duration} = getDataEvent(timeStart, timeEnd);
+
+  return (
+    `<li class="trip-events__item">
+      <div class="event">
+        <div class="event__type">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+        </div>
+        <h3 class="event__title">${type[0].toUpperCase()}${type.slice(1)} to ${destinations.name}</h3>
+        <div class="event__schedule">
+          <p class="event__time">
+          <time class="event__start-time" datetime="${getIsoDate(timeStart)}">${startTime}</time>
+          &mdash;
+          <time class="event__end-time" datetime="${getIsoDate(timeEnd)}">${endTime}</time>
+          </p>
+          <p class="event__duration">${duration}</p>
+        </div>
+        <p class="event__price">
+          &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+        </p>
+        ${createOptions(offers)}
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
+      </div>
+    </li>`
+  );
+};
+
+class Point extends AbstractComponent {
+  constructor(event) {
     super();
-    this._type = {
-      id: type,
-      title: TYPES_OF_EVENT.find((it) => it.id === type).title
-    };
-    this._city = destination.city;
-    this._price = price;
-    this._start = new Date(start);
-    this._end = new Date(end);
-    this._offers = offers.filter((it) => it.accepted);
-  }
-  _getDuration(startTime, endTime) {
-    const start = moment(startTime);
-    const end = moment(endTime);
-    const difference = end.diff(start);
-    return moment.duration(difference, `milliseconds`).format(`dd[d] hh[h] mm[m]`);
+
+    this._event = event;
   }
 
   getTemplate() {
-    return `<li class="trip-events__item">
-    <div class="event">
-      <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.id}.png" alt="Event type icon">
-      </div>
-      <h3 class="event__title">${this._type.title} ${this._city}</h3>
 
-      <div class="event__schedule">
-        <p class="event__time">
-          <time class="event__start-time" datetime="${moment(this._start).format()}">${moment(this._start).format(`h:mm`)}</time>
-          &mdash;
-          <time class="event__end-time" datetime="${moment(this._end).format()}">${moment(this._end).format(`h:mm`)}</time>
-        </p>
-        <p class="event__duration">${this._getDuration(this._start, this._end)}</p>
-      </div>
+    return createEvent(this._event);
+  }
 
-      <p class="event__price">
-        &euro;&nbsp;<span class="event__price-value">${this._price}</span>
-      </p>
-
-      <h4 class="visually-hidden">Offers:</h4>
-      <ul class="event__selected-offers">
-      ${this._offers.slice(0, OFFERS_COUNT).map((offer) => `<li class="event__offer">
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;
-      &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
-     </li>`).join(``)}
-      </ul>
-
-      <button class="event__rollup-btn" type="button">
-        <span class="visually-hidden">Open event</span>
-      </button>
-    </div>
-  </li>`;
-
+  setEditBtnClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
   }
 }
+
+export default Point;

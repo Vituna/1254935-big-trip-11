@@ -1,251 +1,339 @@
-import {TYPES_OF_TRANSFER, TYPES_OF_ACTIVITY, TYPES_OF_EVENT} from "../const.js";
-import {allOffers, allDestinations} from "../main.js";
+import AbstractSmartComponent from "./abstract-smart-component";
+// import {createOffers} from "./offers";
+import {createDestination} from "./destination";
+import {createHeader} from "./header-event";
+import flatpickr from "flatpickr";
 
-import AbstractSmartComponent from "./abstract-smart-component.js";
-import moment from 'moment';
-import DOMPurify from 'dompurify';
+import "flatpickr/dist/flatpickr.min.css";
+import {Format, DefaultData} from "./consts";
 
-export default class Create extends AbstractSmartComponent {
-  constructor({
+const createEventEdit = (mode, options = {}) => {
+  const {
     type,
-    destination,
-    price,
-    start,
-    end,
     offers,
-    isFavorite
-  }) {
+    isFavorite,
+    destinations,
+    isDestination,
+    pointsModel,
+    isOffers,
+    externalData,
+    allOffers,
+    timeStart,
+    timeEnd,
+    basePrice
+  } = options;
+
+  return (
+    `<form class="trip-events__item  event  event--edit" action="#" method="post">
+      ${createHeader(type, timeStart, timeEnd, isFavorite, destinations.name, basePrice, mode, pointsModel, externalData)}
+      <section class="event__details">
+        ${createOffers(offers, type, isOffers, allOffers)}
+        ${createDestination(destinations, isDestination)}
+      </section>
+     </form>`
+  );
+};
+
+const getOffers = (allOffers, type, options) => allOffers.map((it, i) => createOffer(it, type, i, options)).join(`\n`);
+
+export const createOffers = (options, type, isOffers, allOffers) => {
+
+  return isOffers ?
+    `<section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+        <div class="event__available-offers">
+          ${getOffers(allOffers, type, options)}
+        </div>
+      </section>` : ``;
+};
+
+export const createOffer = (option, type, i, options) => {
+  const {title, price} = option;
+  const allOptions = options.map((offer) => offer.title);
+
+  const isChecked = allOptions.includes(title) ? `checked` : ``;
+
+  return (
+    `<div class="event__offer-selector">
+      <input
+        class="event__offer-checkbox  visually-hidden"
+        id="${type}-${i}"
+        type="checkbox"
+        name="event-offer-${type}"
+        value="${title}"
+        ${isChecked}>
+      <label class="event__offer-label" for="${type}-${i}">
+        <span class="event__offer-title">${title}</span>
+        &plus;
+        &euro;&nbsp;<span class="event__offer-price">${price}</span>
+      </label>
+    </div>`
+  );
+};
+
+class EventEdit extends AbstractSmartComponent {
+  constructor(point, mode, pointsModel) {
     super();
-    this._type = {
-      id: type,
-      title: TYPES_OF_EVENT.find((it) => it.id === type).title
-    };
-    this._destination = destination;
-    this._price = price;
 
-    this._start = new Date(start);
-    this._end = new Date(end);
-    this._offers = offers;
-    this._rollunbButtonClickHandler = null;
+    this._event = point;
+    this._type = point.type;
+    this._offers = point.offers;
+    this._isFavorite = point.isFavorite;
+    this._destinations = point.destinations;
+    this._isDestination = !!point.destinations;
+    this._timeStart = point.timeStart;
+    this._timeEnd = point.timeEnd;
+    this._basePrice = point.basePrice;
+    this._mode = mode;
+    this._externalData = DefaultData;
+    this._pointsModel = pointsModel;
+    this._allOffers = pointsModel.getOffersForType(this._type);
+    this._isOffers = this._allOffers.length > 0;
+    this._onSave = null;
+    this._favoriteButtonClickHandler = null;
+    this._deleteButtonClickHandler = null;
+    this._flatpickrFrom = null;
+    this._flatpickrTo = null;
 
+    this._onChangeType = this._onChangeType.bind(this);
+    this._onChangeCity = this._onChangeCity.bind(this);
+    this._onChangeDateFrom = this._onChangeDateFrom.bind(this);
+    this._onChangeDateTo = this._onChangeDateTo.bind(this);
+    this._onChangePrice = this._onChangePrice.bind(this);
+    this._onChangeOffers = this._onChangeOffers.bind(this);
+    this._onFavoriteToggle = this._onFavoriteToggle.bind(this);
 
-    this._isFavorite = isFavorite;
-    this._subscribeOnTypeChange();
-    this._subscribeOnCityChange();
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return `<li class="trip-events__item">
-    <form class="trip-events__item  event  event--edit" action="#" method="post">
-      <header class="event__header">
-        <div class="event__type-wrapper">
-          <label class="event__type  event__type-btn" for="event-type-toggle-1">
-            <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${this._type.id}.png" alt="Event type icon">
-          </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
-
-          <div class="event__type-list">
-          <fieldset class="event__type-group">
-          <legend class="visually-hidden">Transfer</legend>
-          ${TYPES_OF_TRANSFER.map((transferType, index) => `<div class="event__type-item">
-          <input id="event-type-${transferType.id}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${transferType.id}" ${transferType.id === this._type.id ? `checked` : ``} ${!this._type.id && index === 0 ? `checked` : ``}>
-          <label class="event__type-label  event__type-label--${transferType.id}" for="event-type-${transferType.id}-1">${transferType.id}</label>
-        </div>`).join(``)}
-        </fieldset>
-        <fieldset class="event__type-group">
-          <legend class="visually-hidden">Activity</legend>
-          ${TYPES_OF_ACTIVITY.map((activityType) => `<div class="event__type-item">
-          <input id="event-type-${activityType.id}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${activityType.id}"${activityType.id === this._type.id ? `checked` : ``}>
-          <label class="event__type-label  event__type-label--${activityType.id}" for="event-type-${activityType.id}-1">${activityType.id}</label>
-        </div>`).join(``)}
-        </fieldset>
-          </div>
-        </div>
-
-        <div class="event__field-group  event__field-group--destination">
-        <label class="event__label  event__type-output" for="event-destination-1">
-          ${this._type.title}
-        </label>
-        <input class="event__input  event__input--destination" id="event-destination-1"  name="event-destination" value="${this._destination.city ? this._destination.city : ``}" list="destination-list-1"   required>
-        <datalist id="destination-list-1">
-          ${allDestinations ? allDestinations.map((destination) => `<option value="${destination.city}"></option>`).join(``) : ``}
-        </datalist>
-      </div>
-
-
-      <div class="event__field-group  event__field-group--time">
-      <label class="visually-hidden" for="event-start-time-1">
-        From
-      </label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${moment(this._start).format(`D.MM.YY h:mm`)}" required readonly>
-      &mdash;
-      <label class="visually-hidden" for="event-end-time-1">
-        To
-      </label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${moment(this._end).format(`D.MM.YY h:mm`)}" required readonly>
-    </div>
-        <div class="event__field-group  event__field-group--price">
-          <label class="event__label" for="event-price-1">
-            <span class="visually-hidden">${this._price}</span>
-            &euro;
-          </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" min="0" max="1000000" value="${this._price}" required>
-        </div>
-
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
-
-        <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
-        <label class="event__favorite-btn" for="event-favorite-1">
-          <span class="visually-hidden">Add to favorite</span>
-          <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
-            <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
-          </svg>
-        </label>
-
-        <button class="event__rollup-btn" type="button">
-          <span class="visually-hidden">Open event</span>
-        </button>
-      </header>
-
-      <section class="event__details">
-
-        ${this._offers.length > 0 ? `<section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-          <div class="event__available-offers">
-          ${this._offers.map((it) =>`<div class="event__offer-selector">
-              <input class="event__offer-checkbox  visually-hidden" id="event-offer-${it.title.split(`-`)}-1" type="checkbox" name="event-offer-${it.title.split(`-`)}" ${it.accepted ? `checked` : ``}>
-              <label class="event__offer-label" for="event-offer-${it.title.split(`-`)}-1">
-                <span class="event__offer-title">${it.title}</span>
-                &plus;
-                &euro;&nbsp;<span class="event__offer-price">${it.price}</span>
-              </label>
-            </div>`).join(``)}
-          </div>
-        </section>` : ``}
-        ${this._destination ? `<section class="event__section  event__section--destination">
-        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${this._destination.description}</p>
-
-        <div class="event__photos-container">
-          <div class="event__photos-tape">
-
-          ${this._destination.pictures.map((it) => `<img class="event__photo" src=${it.url} alt="${it.alt}">`).join(``)}
-          </div>
-        </div>
-      </section>` : ``}
-
-      </section>
-    </form>
-    </li>`;
+    return createEventEdit(this._mode, {
+      type: this._type,
+      offers: this._offers,
+      allOffers: this._pointsModel.getOffersForType(this._type),
+      isFavorite: this._isFavorite,
+      destinations: this._destinations,
+      isDestination: this._isDestination,
+      timeStart: this._timeStart,
+      timeEnd: this._timeEnd,
+      basePrice: this._basePrice,
+      isOffers: this._isOffers,
+      pointsModel: this._pointsModel,
+      externalData: this._externalData,
+    });
   }
 
-  _subscribeOnTypeChange() {
-    const eventDetailsContainer = this.getElement().querySelector(`.event__details`);
-    const label = this.getElement().querySelector(`.event__type-output`);
-    const img = this.getElement().querySelector(`.event__type-icon`);
-    let offersContainer = this.getElement().querySelector(`.event__available-offers`);
-
-    const onTypeChange = (evt) => {
-      const newType = TYPES_OF_EVENT.find((it) => it.id === evt.target.value);
-      label.textContent = newType.title;
-      img.src = `img/icons/${newType.id}.png`;
-      const offers = allOffers.find((it) => it.type === newType.id).offers;
-      if (!offersContainer) {
-        eventDetailsContainer.insertAdjacentHTML(`afterbegin`, this._getOffersContainer());
-        offersContainer = eventDetailsContainer.querySelector(`.event__available-offers`);
-      }
-      offersContainer.innerHTML = DOMPurify.sanitize(this._getOffers(offers));
-    };
-    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, onTypeChange);
-  }
-
-  _getOffersContainer() {
-    return `<section class="event__section  event__section--offers">
-    <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-    <div class="event__available-offers">
-    </div>
-  </section>`;
-  }
-
-  _subscribeOnCityChange() {
-    const eventDetailsContainer = this.getElement().querySelector(`.event__details`);
-    const options = Array.from(this.getElement().querySelector(`#destination-list-1`).querySelectorAll(`option`));
-    const onCityChange = (evt) => {
-      if (!evt.target.value) {
-        return;
-      }
-      if (options.find((it) => it.value === evt.target.value)) {
-        const newDestination = allDestinations.find((it) => it.city === evt.target.value);
-        this._getDescription(eventDetailsContainer, newDestination);
-        evt.target.setCustomValidity(``);
-      } else {
-        evt.target.setCustomValidity(`Please select a valid value.`);
-      }
-    };
-    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, onCityChange);
-  }
-
-  _getOffers(offers) {
-    return offers.map((it) => {
-      return `<div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${it.title.split(`-`)}-1" type="checkbox" name="event-offer-${it.title.split(`-`)}">
-            <label class="event__offer-label" for="event-offer-${it.title.split(`-`)}-1">
-              <span class="event__offer-title">${it.title}</span>
-              &plus;
-              &euro;&nbsp;<span class="event__offer-price">${it.price}</span>
-            </label>
-          </div>`;
-    }).join(``);
-  }
-
-  _getDescription(eventDetailsContainer, destination) {
-    let destinationContainer = eventDetailsContainer.querySelector(`.event__section--destination`);
-    if (!destinationContainer) {
-      eventDetailsContainer.insertAdjacentHTML(`beforeend`, this._getFirstDescription(destination));
-      destination = eventDetailsContainer.querySelector(`.event__section--destination`);
-    } else {
-      const description = eventDetailsContainer.querySelector(`.event__destination-description`);
-      const photosContainer = eventDetailsContainer.querySelector(`.event__photos-tape`);
-      description.textContent = destination.description;
-      photosContainer.innerHTML = DOMPurify.sanitize(this._getPhotos(destination));
-    }
+  setData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
   }
 
   removeElement() {
-    if (this._flatpickrStartDate || this._flatpickrEndDate) {
-      this._flatpickrStartDate.destroy();
-      this._flatpickrEndDate.destroy();
-      this._flatpickrStartDate = null;
-      this._flatpickrEndDate = null;
+    if (this._flatpickrFrom) {
+      this._flatpickrFrom.destroy();
+      this._flatpickrFrom = null;
     }
+
+    if (this._flatpickrTo) {
+      this._flatpickrTo.destroy();
+      this._flatpickrTo = null;
+    }
+
     super.removeElement();
   }
 
-  reRender() {
-    super.rerender();
-  }
-
   recoveryListeners() {
-    this._subscribeOnCityChange();
-    this._subscribeOnTypeChange();
+    this.setSaveClickHandler(this._onSave);
+    this._subscribeOnEvents();
+    this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
+    this.setFavoriteButtonHandler(this._favoriteButtonClickHandler);
   }
 
-  _getFirstDescription(newType) {
-    return `<section class="event__section  event__section--destination">
-    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-    <p class="event__destination-description">${newType.description}</p>
+  rerender() {
+    super.rerender();
 
-    <div class="event__photos-container">
-      <div class="event__photos-tape">
-      ${newType.pictures.map((it) => `<img class="event__photo" src=${it.url} alt="${it.alt}">`).join(``)}
-      </div>
-    </div>
-  </section>`;
+    this.applyFlatpickr();
   }
 
-  _getPhotos(destination) {
-    return destination.pictures.map((it) => `<img class="event__photo" src=${it.url} alt="${it.alt}">`).join(``);
+  reset() {
+    const point = this._event;
+
+    this._type = point.type;
+    this._offers = point.offers;
+    this._destinations = point.destinations;
+    this._isDestination = !!point.destinations;
+    this._timeStart = point.timeStart;
+    this._timeEnd = point.timeEnd;
+    this._basePrice = point.basePrice;
+    this._allOffers = this._pointsModel.getOffersForType(this._type);
+
+    this.rerender();
+  }
+
+  getData() {
+    const form = this.getElement();
+
+    return new FormData(form);
+  }
+
+  setSaveClickHandler(onSave) {
+    this.getElement().addEventListener(`submit`, onSave);
+    this._onSave = onSave;
+  }
+
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__reset-btn`)
+      .addEventListener(`click`, handler);
+
+    this._deleteButtonClickHandler = handler;
+  }
+
+  setFavoriteButtonHandler(onFavoriteChange) {
+    const favoriteButton = this.getElement().querySelector(`.event__favorite-btn`);
+
+    if (favoriteButton) {
+      favoriteButton.addEventListener(`click`, onFavoriteChange);
+    }
+
+    this._favoriteButtonClickHandler = onFavoriteChange;
+  }
+
+  applyFlatpickr() {
+    const startTimeElement = this.getElement().querySelector(`#event-start-time-1`);
+    const endTimeElement = this.getElement().querySelector(`#event-end-time-1`);
+
+    this.delleteFlatpickr();
+
+    this._initFlatpickrFrom(startTimeElement, this._timeStart);
+    this._initFlatpickrTo(endTimeElement, this._timeEnd);
+  }
+
+  delleteFlatpickr() {
+    if (this._flatpickrFrom) {
+      this._flatpickrFrom.destroy();
+      this._flatpickrFrom = null;
+    }
+    if (this._flatpickrTo) {
+      this._flatpickrTo.destroy();
+      this._flatpickrTo = null;
+    }
+  }
+
+  _initFlatpickrFrom(element, date) {
+    this._flatpickrFrom = flatpickr(element, this._optionsFlatpickr(date, null, this._timeEnd));
+  }
+
+  _initFlatpickrTo(element, date) {
+    this._flatpickrTo = flatpickr(element, this._optionsFlatpickr(date, this._timeStart, null));
+  }
+
+  _optionsFlatpickr(date, minDate, maxDate) {
+    return {
+      enableTime: true,
+      dateFormat: Format.DATE,
+      defaultDate: date || ``,
+      minDate,
+      maxDate,
+    };
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+    const favoriteBtn = element.querySelector(`.event__favorite-btn`);
+    const offers = element.querySelector(`.event__available-offers`);
+
+    if (favoriteBtn) {
+      favoriteBtn.addEventListener(`click`, this._onFavoriteToggle);
+    }
+
+    if (offers) {
+      offers.addEventListener(`change`, this._onChangeOffers);
+    }
+
+    element.querySelector(`.event__type-list`)
+      .addEventListener(`click`, this._onChangeType);
+
+    element.querySelector(`.event__input--destination`)
+      .addEventListener(`change`, this._onChangeCity);
+
+    element.querySelector(`#event-start-time-1`)
+      .addEventListener(`change`, this._onChangeDateFrom);
+
+    element.querySelector(`#event-end-time-1`)
+      .addEventListener(`change`, this._onChangeDateTo);
+
+    element.querySelector(`.event__input--price`)
+      .addEventListener(`change`, this._onChangePrice);
+  }
+
+  _toggleDestination(evt, currentDestination) {
+    if (currentDestination) {
+      this._destinations = currentDestination;
+      this._isDestination = true;
+    }
+  }
+
+  _onChangeType(evt) {
+    if (evt.target.tagName === `INPUT`) {
+      this._type = (evt.target.value).toLowerCase();
+      this._allOffers = this._pointsModel.getOffersForType(this._type);
+      this._offers = [];
+      this._isOffers = this._allOffers.length > 0;
+      this.rerender();
+      evt.target.setAttribute(`checked`, true);
+    }
+  }
+
+  _onChangeCity(evt) {
+    const currentDestination = this._pointsModel.getDestinationForCity(evt.target.value)[0];
+    this._toggleDestination(evt, currentDestination);
+    this.rerender();
+  }
+
+  _onFavoriteToggle() {
+    this._isFavorite = !this._isFavorite;
+  }
+
+  _onChangeDateFrom(evt) {
+    this._timeStart = new Date(evt.target.value);
+    this.rerender();
+  }
+
+  _onChangeDateTo(evt) {
+    this._timeEnd = new Date(evt.target.value);
+    this.rerender();
+  }
+
+  _onChangePrice(evt) {
+    const input = evt.target;
+
+    if (!input.validity.patternMismatch) {
+      this._basePrice = input.value;
+      this.rerender();
+    } else {
+      input.setCustomValidity(`Используйте числовой формат`);
+    }
+  }
+
+  _onChangeOffers(evt) {
+    const offer = evt.target.value;
+    const price = Number(evt.path[1].querySelector(`.event__offer-price`).textContent);
+    const state = this._offers.findIndex((it) => it.title === offer);
+    const offers = this._offers;
+
+    if (state < 0) {
+      const newOffer = {
+        title: offer,
+        price,
+      };
+      offers.push(newOffer);
+    } else {
+      offers.splice(state, 1);
+    }
+
+    this._offers = offers;
   }
 }
+
+export default EventEdit;

@@ -1,172 +1,100 @@
-import Menu from './components/site-menu.js';
-import Filters from './components/filters.js';
-import Route from './components/route.js';
-import Stats from './components/stats.js';
-import TripController from './controllers/trip-controller.js';
-import LoadingMessage from './components/loading-message.js';
-import API from './api/api.js';
-import Store from './api/store.js';
-import Provider from './api/provider.js';
-import {filtersNames, ActionType} from "./const.js";
-import {render, remove, RenderPosition, getPrice} from "./util.js";
+import API from "./api/api";
+import Provider from "./api/provider";
+import Store from "./api/store";
+import HeaderInfoComponent from "./components/route";
+import MenuComponent from "./components/site-menu";
+import BoardComponent from "./components/point-day-all";
+import Stats from "./components/stats";
+import TripController from "./controllers/trip-controller";
+import FilterController from "./controllers/filter-controller";
+import PointsModel from "./models/points";
 
-const AUTORIZATION = `Basic dZZlckBwYXNuy29yZAo=`;
-const URL = `https://11.ecmascript.pages.academy/big-trip/`;
-const Keys = {
-  EVENTS: `events-store-key`,
-  OFFERS: `offers-store-key`,
-  DESTINATIONS: `destinations-store-key`,
-};
+import {Place, ApiOption, MenuItem} from "./components/consts";
 
-const tripControls = document.querySelector(`.trip-controls`);
-const tripEvents = document.querySelector(`.trip-events`);
-const tripInfo = document.querySelector(`.trip-main`);
-const addButton = document.querySelector(`.trip-main__event-add-btn`);
+import {render} from "./utils/render";
 
-const api = new API({
-  url: URL,
-  authorization: AUTORIZATION
-});
-
-const store = new Store(Keys, window.localStorage);
-const provider = new Provider(api, store);
-
-const onDataChange = (actionType, data, onError, element) => {
-  switch (actionType) {
-    case ActionType.DELETE:
-      provider.deleteEvent(data.id)
-        .then(() => provider.getEvents())
-        .then((events) => {
-          tripController.init(events);
-          info.remove();
-          info = renderInfo(events);
-          stats.update(events);
-        })
-        .catch(() => {
-          onError();
-        });
-      break;
-    case ActionType.CHANGE:
-      provider.changeEvent(data.id, data)
-        .then(() => provider.getEvents())
-        .then((events) => {
-          stats.update(events);
-          tripController.init(events);
-          info.remove();
-          info = renderInfo(events);
-        })
-        .catch(() => {
-          onError();
-        });
-      break;
-    case ActionType.CREATE:
-      provider.createEvent(data)
-        .then(() => provider.getEvents())
-        .then((events) => {
-          stats.update(events);
-
-          tripController.init(events);
-          info.remove();
-          info = renderInfo(events);
-          remove(element);
-        })
-        .catch(() => {
-          onError();
-        });
-  }
-};
-
-const renderInfo = (events) => {
-  let price = getPrice(events);
-  const info = new Route(events, price);
-  if (events.length !== 0) {
-    render(tripInfo, info.getElement(), RenderPosition.PREPEND);
-  }
-  return info.getElement();
-};
-
-const menu = new Menu();
-const filters = new Filters(filtersNames);
-const stats = new Stats();
-const loadingMessage = new LoadingMessage();
-const tripController = new TripController(tripEvents, onDataChange);
-
-render(tripControls, menu.getElement(), RenderPosition.APPEND);
-render(tripControls, filters.getElement(), RenderPosition.APPEND);
-render(tripEvents, stats.getElement(), RenderPosition.APPEND);
-render(tripEvents, loadingMessage.getElement(), RenderPosition.APPEND);
-
-
-let info;
-let allOffers;
-let allDestinations;
-(Promise.all([provider.getOffers(), provider.getDestinations(), provider.getEvents()])
-  .then(([offers, destinations, events]) => {
-    allOffers = offers;
-    allDestinations = destinations;
-
-    stats.getStatistics(events);
-    tripController.init(events);
-    info = renderInfo(events);
-  }))
-.then(() => {
-  remove(loadingMessage.getElement());
-});
-
-export {
-  allOffers,
-  allDestinations
-};
-
-const menuLink = menu.getElement().querySelectorAll(`a`);
-
-const onAddEventButtonClick = () => {
-  addButton.disabled = true;
-  tripController.createEvent(addButton);
-  tripController.onChangeView();
-  stats.hide();
+const getStateTable = (tripController, statisticsComponent) => {
+  pointsModel.setActivePage(MenuItem.TABLE);
+  filterController.setDefaultFilterType();
+  statisticsComponent.hide();
   tripController.show();
-  Array.from(menuLink).find((a) => a.text === `Table`).classList.add(`trip-tabs__btn--active`);
-  Array.from(menuLink).find((a) => a.text === `Stats`).classList.remove(`trip-tabs__btn--active`);
 };
 
-const onMenuClick = (evt) => {
-
-  if (evt.target.tagName !== `A`) {
-    return;
-  }
-  menu.getElement().querySelector(`.trip-tabs__btn--active`).classList.remove(`trip-tabs__btn--active`);
-  evt.target.classList.add(`trip-tabs__btn--active`);
-  switch (evt.target.textContent) {
-    case `Table`:
-      stats.hide();
-      tripController.show();
-      filters.getElement().classList.remove(`visually-hidden`);
-      break;
-    case `Stats`:
-      tripController.hide();
-      filters.getElement().classList.add(`visually-hidden`);
-      stats.show();
-  }
+const getStateStats = (tripController, statisticsComponent) => {
+  pointsModel.setActivePage(MenuItem.STATS);
+  filterController.setDefaultFilterType();
+  statisticsComponent.show();
+  tripController.hide();
 };
 
-window.addEventListener(`offline`, () => {
-  document.title = `${document.title}[OFFLINE]`;
-});
+const menuSwitch = (menuItem) => {
+  return menuState[menuItem](tripController, statisticsComponent);
+};
 
-window.addEventListener(`online`, () => {
-  document.title = document.title.split(`[OFFLINE]`)[0];
-  provider.syncEvents()
-  .then(() => provider.getEvents())
-  .then((events) => {
-    tripController.init(events);
+const load = (offers, destinations, points) => {
+  pointsModel.setOffers(offers);
+  pointsModel.setDestinations(destinations);
+  pointsModel.setPoints(points);
+
+  render(headerInfo, headerInfoComponent, Place.AFTERBEGIN);
+  tripController.render();
+};
+
+const init = () => {
+  render(tripMenuTitle, menuComponent, Place.AFTERNODE);
+
+  filterController.render();
+
+  render(tripBoard, boardComponent, Place.BEFOREEND);
+  render(tripBoard, statisticsComponent, Place.AFTERNODE);
+
+  statisticsComponent.hide();
+  menuComponent.setOnChange(menuSwitch);
+
+  Promise.all([apiWithProvider.getOffers(), apiWithProvider.getDestinations(), apiWithProvider.getPoints()])
+    .then(([offers, destinations, points]) => load(offers, destinations, points));
+
+  window.addEventListener(`online`, () => {
+    document.title = document.title.replace(` [offline]`, ``);
+
+    apiWithProvider.sync();
   });
-});
 
-const onFilterClick = () => {
-  tripController.init();
+  window.addEventListener(`offline`, () => {
+    document.title += ` [offline]`;
+  });
+
+  window.addEventListener(`load`, () => {
+    navigator.serviceWorker.register(`./sw.js`);
+  });
 };
 
-menu.getElement().addEventListener(`click`, onMenuClick);
-addButton.addEventListener(`click`, onAddEventButtonClick);
-filters.getElement().addEventListener(`change`, onFilterClick);
+const headerInfo = document.querySelector(`.trip-main`);
+const tripControls = document.querySelector(`.trip-controls`);
+const tripMenuTitle = tripControls.querySelector(`h2`);
+const tripBoard = document.querySelector(`.trip-events`);
+const menuState = {
+  table: getStateTable,
+  stats: getStateStats,
+};
+
+const menuComponent = new MenuComponent();
+const boardComponent = new BoardComponent();
+const pointsModel = new PointsModel();
+const headerInfoComponent = new HeaderInfoComponent(pointsModel);
+const api = new API(ApiOption.END_POINT, ApiOption.AUTHORIZATION);
+const store = new Store(ApiOption.STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+const statisticsComponent = new Stats(pointsModel);
+const filterController = new FilterController(tripControls, pointsModel);
+const tripController = new TripController(
+    boardComponent,
+    pointsModel,
+    menuComponent,
+    apiWithProvider,
+    statisticsComponent,
+    filterController,
+    headerInfoComponent
+);
+
+init();

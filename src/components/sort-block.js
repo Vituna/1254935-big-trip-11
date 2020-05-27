@@ -1,13 +1,21 @@
-import AbstractComponent from "./abstract-component.js";
+import AbstractComponent from "./abstract-component";
 
-export default class SortBlock extends AbstractComponent {
+const createEmptyDay = () => {
+
+  return (
+    `<li class="trip-days__item  day">
+        <div class="day__info"></div>
+        <ul class="trip-events__list"></ul>
+     </li>`
+  );
+};
+
+class SortBlock extends AbstractComponent {
 
   getTemplate() {
-    return `<li class="trip-days__item  day">
-    <div class="day__info">
-     </div>
-    <ul class="trip-events__list">
-    </ul>
-    </li>`;
+
+    return createEmptyDay();
   }
 }
+
+export default SortBlock;

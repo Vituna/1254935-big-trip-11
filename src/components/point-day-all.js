@@ -1,8 +1,13 @@
-import AbstractComponent from "./abstract-component.js";
+import AbstractComponent from "./abstract-component";
 
-export default class PointDayAll extends AbstractComponent {
+const createBoard = () => `<ul class="trip-days"></ul>`;
+
+class PointDayAll extends AbstractComponent {
   getTemplate() {
-    return `<ul class="trip-days">
-    </ul>`;
+
+    return createBoard();
   }
 }
+
+export default PointDayAll;
+

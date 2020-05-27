@@ -1,92 +1,95 @@
-import ModelPoint from '../models/model-point.js';
-import ModelDestinations from '../models/model-destinations';
+import Point from "../models/point";
+import {ApiOption, Method, Code} from "../components/consts";
 
-export default class API {
-  constructor({url, authorization}) {
-    this._url = url;
+const checkStatus = (response) => {
+  if (response.status >= Code.OK && response.status < Code.NOT_OK) {
+    return response;
+  } else {
+    throw new Error(`${response.status}: ${response.statusText}`);
+  }
+};
+
+const getConfigFetch = (data, url, method) => {
+  return {
+    url,
+    method,
+    body: JSON.stringify(data.toRAW()),
+    headers: new Headers(ApiOption.CONTENT_TYPE)
+  };
+};
+
+class API {
+  constructor(endPoint, authorization) {
+    this._endPoint = endPoint;
     this._authorization = authorization;
   }
 
-  getOffers() {
-    return this._load({
-      url: `${this._url}offers`
-    })
-    .then((response) => response.json());
+  getPoints() {
+    return this._load({url: ApiOption.POINTS})
+      .then((response) => response.json())
+      .then(Point.parsePoints)
+      .catch((err) => {
+        throw err;
+      });
   }
 
   getDestinations() {
+    return this._load({url: ApiOption.DESTINATIONS})
+      .then((response) => response.json())
+      .catch((err) => {
+        throw err;
+      });
+  }
+
+  getOffers() {
+    return this._load({url: ApiOption.OFFERS})
+      .then((response) => response.json())
+      .catch((err) => {
+        throw err;
+      });
+  }
+
+  createPoint(point) {
+    return this._load(getConfigFetch(point, ApiOption.POINTS, Method.POST))
+      .then((response) => response.json())
+      .then(Point.parsePoint)
+      .catch((err) => {
+        throw err;
+      });
+  }
+
+  updatePoint(id, data) {
+    return this._load(getConfigFetch(data, `${ApiOption.POINTS}/${id}`, Method.PUT))
+      .then((response) => response.json())
+      .then(Point.parsePoint)
+      .catch((err) => {
+        throw err;
+      });
+  }
+
+  deletePoint(id) {
+    return this._load({url: `${ApiOption.POINTS}/${id}`, method: Method.DELETE});
+  }
+
+  sync(data) {
     return this._load({
-      url: `${this._url}destinations`
+      url: ApiOption.SYNC,
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers(ApiOption.CONTENT_TYPE)
     })
-    .then((response) => response.json())
-    .then(ModelDestinations.parseDestinations);
+      .then((response) => response.json());
   }
 
-  getEvents() {
-    return this._load({
-      url: `${this._url}points`
-    })
-    .then((response) => response.json())
-    .then(ModelPoint.parseEvents);
-  }
-
-  createEvent(event) {
-    const dataRAW = ModelPoint.toRAW(event);
-    return this._load({
-      url: `${this._url}points`,
-      method: `POST`,
-      body: JSON.stringify(dataRAW),
-      headers: new Headers({'Content-Type': `application/json`})
-    })
-    .then((response) => response.json())
-    .then(ModelPoint.parseEvent);
-  }
-
-  deleteEvent(id) {
-    return this._load({
-      url: `${this._url}points/${id}`,
-      method: `DELETE`
-    });
-  }
-
-  changeEvent(id, data) {
-    const dataRAW = ModelPoint.toRAW(data);
-
-    return this._load({
-      url: `${this._url}points/${id}`,
-      method: `PUT`,
-      body: JSON.stringify(dataRAW),
-      headers: new Headers({'Content-Type': `application/json`})
-    })
-    .then((response) => response.json())
-    .then(ModelPoint.parseEvent);
-  }
-
-  syncEvents(events) {
-    return this._load({
-      url: `${this._url}points/sync`,
-      method: `POST`,
-      body: JSON.stringify(events),
-      headers: new Headers({'Content-Type': `application/json`})
-    })
-    .then((response) => response.json());
-  }
-
-  _checkStatus(response) {
-    if (response.status >= 200 && response.status < 300) {
-
-      return response;
-    } else {
-      throw new Error(`${response.status} : ${response.statusText}`);
-    }
-  }
-
-  _load({url, method = `GET`, body = null, headers = new Headers()}) {
+  _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
-    return fetch(url, {method, body, headers})
-    .then(this._checkStatus)
-    .catch((error) => {
-      throw error;
-    });
+
+    return fetch(`${this._endPoint}/${url}`, {method, body, headers})
+      .then(checkStatus)
+      .catch((err) => {
+        throw err;
+      });
   }
 }
+
+export default API;

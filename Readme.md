@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Viktor Ivanov](https://up.htmlacademy.ru/ecmascript/11/user/1254935).
-* Наставник: [Игорь Тараканов](https://htmlacademy.ru/profile/id487569).
+* Наставник: [Артём Рудов](https://htmlacademy.ru/profile/artrudov).
 
 ---
 
