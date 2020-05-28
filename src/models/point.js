@@ -13,8 +13,8 @@ class Point {
   toRAW() {
     return {
       "base_price": this.basePrice,
-      "date_from": this.timeStart.toISOString(),
-      "date_to": this.timeEnd.toISOString(),
+      "date_from": this.timeStart,
+      "date_to": this.timeEnd,
       "destination": this.destinations,
       "id": this.id,
       "is_favorite": this.isFavorite,
