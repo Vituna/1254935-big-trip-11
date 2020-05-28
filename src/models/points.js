@@ -1,4 +1,4 @@
-import {FilterType, MenuItem} from "../components/consts";
+import {FilterType, MenuItem} from "../utils/consts";
 import {getPointsByFilter} from "../utils/filter";
 
 class Points {

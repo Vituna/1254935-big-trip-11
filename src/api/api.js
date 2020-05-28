@@ -1,5 +1,7 @@
 import Point from "../models/point";
-import {ApiOption, Method, Code} from "../components/consts";
+import {Method, Code} from "../utils/consts";
+import {ApiOption} from "../main";
+
 
 const checkStatus = (response) => {
   if (response.status >= Code.OK && response.status < Code.NOT_OK) {

@@ -8,10 +8,22 @@ import Stats from "./components/stats";
 import TripController from "./controllers/trip-controller";
 import FilterController from "./controllers/filter-controller";
 import PointsModel from "./models/points";
-
-import {Place, ApiOption, MenuItem} from "./components/consts";
-
+import {Place, MenuItem} from "./utils/consts";
 import {render} from "./utils/render";
+
+export const ApiOption = {
+  AUTHORIZATION: `Basic hgfd7jf7h786kjbnbn1sldjfls`,
+  END_POINT: `https://11.ecmascript.pages.academy/big-trip`,
+  CONTENT_TYPE: {"Content-Type": `application/json`},
+  POINTS: `points`,
+  DESTINATIONS: `destinations`,
+  OFFERS: `offers`,
+  SYNC: `points/sync`,
+  SHAKE_ANIMATION_TIMEOUT: 600,
+  DURATION_SHAKE: 1000,
+  ERROR_BORDER: `2px solid red`,
+  STORE_NAME: `${`big-trip-localstorage`}-${`v1`}`,
+};
 
 const getStateTable = (tripController, statisticsComponent) => {
   pointsModel.setActivePage(MenuItem.TABLE);

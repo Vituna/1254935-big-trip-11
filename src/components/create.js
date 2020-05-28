@@ -1,11 +1,10 @@
 import AbstractSmartComponent from "./abstract-smart-component";
-// import {createOffers} from "./offers";
 import {createDestination} from "./destination";
 import {createHeader} from "./header-event";
 import flatpickr from "flatpickr";
 
 import "flatpickr/dist/flatpickr.min.css";
-import {Format, DefaultData} from "./consts";
+import {Format, DefaultData} from "../utils/consts";
 
 const createEventEdit = (mode, options = {}) => {
   const {
@@ -36,22 +35,20 @@ const createEventEdit = (mode, options = {}) => {
 
 const getOffers = (allOffers, type, options) => allOffers.map((it, i) => createOffer(it, type, i, options)).join(`\n`);
 
-export const createOffers = (options, type, isOffers, allOffers) => {
+const createOffers = (options, type, isOffers, allOffers) => {
 
   return isOffers ?
     `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
         <div class="event__available-offers">
           ${getOffers(allOffers, type, options)}
         </div>
       </section>` : ``;
 };
 
-export const createOffer = (option, type, i, options) => {
+const createOffer = (option, type, i, options) => {
   const {title, price} = option;
   const allOptions = options.map((offer) => offer.title);
-
   const isChecked = allOptions.includes(title) ? `checked` : ``;
 
   return (
@@ -89,7 +86,7 @@ class EventEdit extends AbstractSmartComponent {
     this._externalData = DefaultData;
     this._pointsModel = pointsModel;
     this._allOffers = pointsModel.getOffersForType(this._type);
-    this._isOffers = this._allOffers.length > 0;
+    this._isOffers = this._allOffers.length < 0;
     this._onSave = null;
     this._favoriteButtonClickHandler = null;
     this._deleteButtonClickHandler = null;
@@ -152,7 +149,6 @@ class EventEdit extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-
     this.applyFlatpickr();
   }
 

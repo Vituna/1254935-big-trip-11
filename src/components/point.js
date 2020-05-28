@@ -1,12 +1,10 @@
 import AbstractComponent from "./abstract-component";
-
 import {castTimeFormat, getIsoDate, getDurationMinutes} from "../utils/common";
-import {Format} from "./consts";
+import {Format} from "../utils/consts";
 import moment from "moment";
 
 const getDuration = (start, end) => {
   const duration = getDurationMinutes(start, end);
-
   const durationHour = Math.floor(duration / Format.IN_HOUR);
   const durationMinute = (duration) % Format.IN_HOUR;
   const durationDay = Math.floor(durationHour / Format.IN_DAY);

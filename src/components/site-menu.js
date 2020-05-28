@@ -1,5 +1,5 @@
 import AbstractComponent from "./abstract-component";
-import {TagName} from "./consts";
+import {TagName} from "../utils/consts";
 
 const createMenu = () => {
 

@@ -1,5 +1,5 @@
 import {createElement} from "../utils/render";
-import {HIDDEN_CLASS} from "./consts";
+import {HIDDEN_CLASS} from "../utils/consts";
 
 class AbstractComponent {
   constructor() {

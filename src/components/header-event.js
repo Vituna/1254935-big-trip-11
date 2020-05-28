@@ -1,10 +1,6 @@
 import {toNormalCase} from "../utils/common";
-// import {createEventType} from "./select-type";
-// import {createSelectTime} from "./selectTime";
-// import {createSelectPrice} from "./select-price";
-import {Mode, DefaultData, EvenOption, Format} from "./consts";
+import {Mode, DefaultData, EvenOption, Format} from "../utils/consts";
 import moment from "moment";
-
 
 const createFavoriteBtn = (isFavorite) => {
   return (
@@ -112,7 +108,7 @@ const getDate = (date) => {
   return moment(date).format(Format.DATE_TIME_REVERS);
 };
 
-export const createSelectTime = (timeStart, timeEnd) => {
+const createSelectTime = (timeStart, timeEnd) => {
 
   return (
     `<div class="event__field-group  event__field-group--time">
@@ -143,7 +139,7 @@ const createSelectPrice = (price) => {
         name="event-price"
         value="${price}"
         pattern="^[0-9]+$"
-        title="Используйте числовой формат"
+        title="Введите сумму"
         required>
     </div>`
   );

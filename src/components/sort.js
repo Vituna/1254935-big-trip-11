@@ -1,5 +1,5 @@
 import AbstractSmartComponent from "./abstract-smart-component";
-import {SortType} from "./consts";
+import {SortType} from "../utils/consts";
 import {toNormalCase} from "../utils/common";
 
 const createSortButton = (type, currentType) => {

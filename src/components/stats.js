@@ -1,8 +1,7 @@
 import AbstractSmartComponent from "./abstract-smart-component";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-
-import {BAR_HEIGHT, TypeChart, typeIcon} from "./consts";
+import {BAR_HEIGHT, TypeChart, typeIcon} from "../utils/consts";
 import {getUniqItems} from "../utils/common";
 import {formatedDuration, getCountByTypes, getDurationByTypes, getMoneyByTypes} from "../utils/statistics";
 

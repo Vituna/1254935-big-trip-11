@@ -11,7 +11,7 @@ import {
   SortType,
   Mode as PointControllerMode,
   Selector, MenuItem
-} from "../components/consts";
+} from "../utils/consts";
 import moment from "moment";
 import {getSortedEvents, makeCounter} from "../utils/common";
 import {render} from "../utils/render";

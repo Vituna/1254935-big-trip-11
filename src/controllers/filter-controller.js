@@ -1,4 +1,4 @@
-import {FilterType, MenuItem, Place} from "../components/consts";
+import {FilterType, MenuItem, Place} from "../utils/consts";
 import FilterComponent from "../components/filters";
 import {replace, render} from "../utils/render";
 import {getPointsByFilter} from "../utils/filter";

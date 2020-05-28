@@ -1,4 +1,4 @@
-import {EvtKey, Format, SortType} from "../components/consts";
+import {EvtKey, Format, SortType} from "./consts";
 import moment from "moment";
 
 export const makeCounter = () => {

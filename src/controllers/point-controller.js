@@ -1,9 +1,9 @@
-import EventComponent from "../components/point";
-import EventEditComponent from "../components/create";
+import Point from "../components/point";
+import EventEdit from "../components/create";
 import PointModel from "../models/point";
-
 import {render, replace} from "../utils/render";
-import {Place, Mode, emptyPoint, ApiOption, DuringData} from "../components/consts";
+import {Place, Mode, emptyPoint, DuringData} from "../utils/consts";
+import {ApiOption} from "../main";
 import {encode} from "he";
 import {getDestinationForCity, getOffersForType, isEscKey} from "../utils/common";
 
@@ -51,8 +51,8 @@ class PointController {
     const oldEventComponent = this._eventComponent;
     const oldEventEditComponent = this._eventEditComponent;
     this._mode = mode;
-    this._eventComponent = new EventComponent(event);
-    this._eventEditComponent = new EventEditComponent(event, mode, this._pointsModel);
+    this._eventComponent = new Point(event);
+    this._eventEditComponent = new EventEdit(event, mode, this._pointsModel);
 
     this._addListeners(event);
 

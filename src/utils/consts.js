@@ -1,7 +1,5 @@
 export const HIDDEN_CLASS = `visually-hidden`;
 export const BAR_HEIGHT = 55;
-const STORE_PREFIX = `big-trip-localstorage`;
-const STORE_VER = `v1`;
 
 export const EvenOption = {
   TYPE_TRANSPORT: [`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`],
@@ -12,29 +10,15 @@ export const Format = {
   LESS_TEN: 10,
   IN_HOUR: 60,
   IN_DAY: 24,
-  DATE: `m/d/y H:i`,
+  DATE: `m.d.y H:i`,
   TIME: `HH:mm`,
-  ISO_DATE: `YYYY-MM-DDTHH:mm`,
-  DATE_TIME: `YYYY-MM-DD`,
-  DATE_TIME_REVERS: `MM/DD/YY hh:mm`,
+  ISO_DATE: `YYYY.MM.DDTHH:mm`,
+  DATE_TIME: `YYYY.MM.DD`,
+  DATE_TIME_REVERS: `MM.DD.YY hh:mm`,
   DAY_DATE: `MMM DD`,
   MAX_TITLE_COUNT: 3,
   MAX_DATE_COUNT: 2,
   MIN_DATE_COUNT: 1,
-};
-
-export const ApiOption = {
-  AUTHORIZATION: `Basic hgfd7jf7h786kjtyty1sldjfls`,
-  END_POINT: `https://11.ecmascript.pages.academy/big-trip`,
-  CONTENT_TYPE: {"Content-Type": `application/json`},
-  POINTS: `points`,
-  DESTINATIONS: `destinations`,
-  OFFERS: `offers`,
-  SYNC: `points/sync`,
-  SHAKE_ANIMATION_TIMEOUT: 600,
-  DURATION_SHAKE: 1000,
-  ERROR_BORDER: `2px solid red`,
-  STORE_NAME: `${STORE_PREFIX}-${STORE_VER}`,
 };
 
 export const Place = {

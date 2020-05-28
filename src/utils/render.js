@@ -1,4 +1,4 @@
-import {Place} from "../components/consts";
+import {Place} from "./consts";
 
 export const render = (container, component, place) => {
   switch (place) {

@@ -1,6 +1,5 @@
 import {isOnline} from "../api/provider";
 
-
 export const createDestination = (destinations, isDestination) => {
   const {description, pictures} = destinations;
 

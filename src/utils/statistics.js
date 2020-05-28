@@ -1,5 +1,5 @@
 import {getDurationMinutes} from "./common";
-import {Format} from "../components/consts";
+import {Format} from "./consts";
 
 const getMoneyByType = (type, events) => {
   let total = 0;
