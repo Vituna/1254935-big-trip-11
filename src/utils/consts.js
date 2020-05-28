@@ -10,7 +10,7 @@ export const Format = {
   LESS_TEN: 10,
   IN_HOUR: 60,
   IN_DAY: 24,
-  DATE: `d/m/y H:i`,
+  DATE: `m/d/y H:i`,
   TIME: `HH:mm`,
   ISO_DATE: `YYYY-MM-DDTHH:mm`,
   DATE_TIME: `YYYY-MM-DD`,
