@@ -27,60 +27,49 @@ const DATA = [
 const onInstall = (evt) => {
   evt.waitUntil(
       caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(DATA);
-      })
+    .then((cache) => {
+      return cache.addAll(DATA);
+    })
   );
 };
 
 const onActivate = (evt) => {
   evt.waitUntil(
-
       caches.keys()
-      .then(
-
-          (keys) => Promise.all(
-              keys.map(
-                  (key) => {
-
-                    if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
-                      return caches.delete(key);
-                    }
-
-                    return null;
-                  })
-            .filter((key) => key !== null)
-          )
-      )
+    .then(
+        (keys) => Promise.all(
+            keys.map(
+                (key) => {
+                  if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
+                    return caches.delete(key);
+                  }
+                  return null;
+                })
+        .filter((key) => key !== null)
+        )
+    )
   );
 };
 
 const onFetch = (evt) => {
   const {request} = evt;
-
   evt.respondWith(
       caches.match(request)
-      .then((cacheResponse) => {
-
-        if (cacheResponse) {
-          return cacheResponse;
+    .then((cacheResponse) => {
+      if (cacheResponse) {
+        return cacheResponse;
+      }
+      return fetch(request)
+      .then((response) => {
+        if (!response || response.status !== STATUS_SUCCESS || response.type !== STATUS_BASIC) {
+          return response;
         }
-
-        return fetch(request)
-          .then((response) => {
-
-            if (!response || response.status !== STATUS_SUCCESS || response.type !== STATUS_BASIC) {
-              return response;
-            }
-
-            const clonedResponse = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => cache.put(request, clonedResponse));
-
-            return response;
-          });
-      })
+        const clonedResponse = response.clone();
+        caches.open(CACHE_NAME)
+        .then((cache) => cache.put(request, clonedResponse));
+        return response;
+      });
+    })
   );
 };
 

@@ -2,7 +2,6 @@ import AbstractSmartComponent from "./abstract-smart-component";
 import {createDestination} from "./destination";
 import {createHeader} from "./header-event";
 import flatpickr from "flatpickr";
-
 import "flatpickr/dist/flatpickr.min.css";
 import {Format, DefaultData} from "../utils/consts";
 
@@ -308,7 +307,7 @@ class EventEdit extends AbstractSmartComponent {
       this._basePrice = input.value;
       this.rerender();
     } else {
-      input.setCustomValidity(`Используйте числовой формат`);
+      input.setCustomValidity(`Use the number format`);
     }
   }
 

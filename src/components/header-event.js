@@ -139,7 +139,7 @@ const createSelectPrice = (price) => {
         name="event-price"
         value="${price}"
         pattern="^[0-9]+$"
-        title="Введите сумму"
+        title="Enter amount"
         required>
     </div>`
   );
