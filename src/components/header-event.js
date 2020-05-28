@@ -18,7 +18,7 @@ const createOptionCity = (city) => `<option value="${city}"></option>`;
 
 const getCities = (CITIES) => CITIES.map((it) => createOptionCity(it)).join(`\n`);
 
-export const createCitySelect = (typeEvent, city, CITIES) => {
+const createCitySelect = (typeEvent, city, CITIES) => {
   const type = toNormalCase(typeEvent);
 
   return (
@@ -60,7 +60,7 @@ const createSelect = (type, isChecked) => {
 
 const getActivity = (type) => EvenOption.TYPE_ACTIVITY.map((it) => createSelect(it, it === type)).join(`\n`);
 
-export const createActivity = (type) => {
+const createActivity = (type) => {
   const typeEvent = toNormalCase(type);
 
   return (
@@ -74,7 +74,7 @@ export const createActivity = (type) => {
 
 const getTransfers = (type) => EvenOption.TYPE_TRANSPORT.map((it) => createSelect(it, it === type)).join(`\n`);
 
-export const createTransfer = (type) => {
+const createTransfer = (type) => {
   const typeEvent = toNormalCase(type);
 
   return (
@@ -86,7 +86,7 @@ export const createTransfer = (type) => {
 };
 
 
-export const createEventType = (typeEvent) => {
+const createEventType = (typeEvent) => {
 
   return (
     `<div class="event__type-wrapper">

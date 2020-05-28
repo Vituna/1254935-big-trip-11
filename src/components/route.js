@@ -17,7 +17,7 @@ const getAllPrice = (total, point) => {
   return total;
 };
 
-export const createTripCost = (points) => {
+const createTripCost = (points) => {
   const price = points.reduce(getAllPrice, 0);
 
   return (
@@ -74,7 +74,7 @@ const getDates = (points) => {
   }, []);
 };
 
-export const createTripInfo = (points) => {
+const createTripInfo = (points) => {
   const sortedPoints = getSortByDate(points);
   const cities = getCities(sortedPoints);
   const dates = getDates(sortedPoints);
